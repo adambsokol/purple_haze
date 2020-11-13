@@ -4,7 +4,7 @@ To run do the following commands (as of 11/13):
 import air as air
 import matcher as match
 sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
-matched_ses_data = match.station_matcher(real_data)
+matched_ses_data = match.station_matcher(sensor_data)
 
 Note, you may have to change the imports depending on where you're running this from. If you are in the purple_haze folder this works.
 '''
