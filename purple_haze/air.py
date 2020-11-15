@@ -240,9 +240,13 @@ class DataStream:
                 pass
                 
         # convert the time field to datetimes
-        time = ds.time.values
-        time = np.array([pd.to_datetime(t) for t in time])
-        ds['time'] = (('time'), time)
+        time = []
+        for t in ds.time.values:
+            if t.endswith('UTC'):
+                time.append(np.datetime64(t[:-3].strip()))
+            else:
+                time.append(np.datetime64(t))
+        ds['time'] = (('time'), np.array(time))
 
         # add some attributes with the DataStream info
         ds.attrs['sensor_name'] = self.sensor_name
