@@ -40,13 +40,13 @@ def files_to_dataframe(file_list):
     streams = [DataStream(file) for file in file_list]
     
     # make dataframe
-    df = pd.DataFrame({'file': file_list,
-                      'lat': [st.lat for st in streams],
-                      'lon': [st.lon for st in streams],
-                      'sensor_name': [st.sensor_name for st in streams],
-                      'loc': [st.loc for st in streams],
-                      'channel': [st.channel for st in streams],
-                      'data_type': [st.data_type for st in streams]
+    df = pd.DataFrame({"file": file_list,
+                      "lat": [st.lat for st in streams],
+                      "lon": [st.lon for st in streams],
+                      "sensor_name": [st.sensor_name for st in streams],
+                      "loc": [st.loc for st in streams],
+                      "channel": [st.channel for st in streams],
+                      "data_type": [st.data_type for st in streams]
                       })
     return df
 
@@ -92,6 +92,9 @@ def aqi(pm25):
     
     Calculates AQI from PM2.5 using EPA formula and breakpoints from:
     https://www.airnow.gov/sites/default/files/2018-05/aqi-technical-assistance-document-may2016.pdf
+    
+    Arguments:
+         - pm25 (int or float): PM2.5 in ug/m3
     """
     
     if pm25 < 0:
@@ -100,40 +103,40 @@ def aqi(pm25):
         # round PM2.5 to nearest tenth for categorization
         pm25 = np.round(pm25, 1)
         
-    green = {'aqi_low': 0,
-             'aqi_hi': 50,
-             'pm_low': 0.0,
-             'pm_hi': 12.0
+    green = {"aqi_low": 0,
+             "aqi_hi": 50,
+             "pm_low": 0.0,
+             "pm_hi": 12.0
             }
     
-    yellow = {'aqi_low': 51,
-              'aqi_hi': 100,
-              'pm_low': 12.1,
-              'pm_hi': 35.4
+    yellow = {"aqi_low": 51,
+              "aqi_hi": 100,
+              "pm_low": 12.1,
+              "pm_hi": 35.4
              }
     
-    orange = {'aqi_low': 101,
-              'aqi_hi': 150,
-              'pm_low': 35.5,
-              'pm_hi': 55.4
+    orange = {"aqi_low": 101,
+              "aqi_hi": 150,
+              "pm_low": 35.5,
+              "pm_hi": 55.4
              }
     
-    red = {'aqi_low': 151,
-           'aqi_hi': 200,
-           'pm_low': 55.5,
-           'pm_hi': 150.4
+    red = {"aqi_low": 151,
+           "aqi_hi": 200,
+           "pm_low": 55.5,
+           "pm_hi": 150.4
           }
     
-    purple = {'aqi_low': 201,
-              'aqi_hi': 300,
-              'pm_low': 150.5,
-              'pm_hi': 250.4
+    purple = {"aqi_low": 201,
+              "aqi_hi": 300,
+              "pm_low": 150.5,
+              "pm_hi": 250.4
              }
     
-    maroon = {'aqi_low': 301,
-              'aqi_hi': 400,
-              'pm_low': 250.5,
-              'pm_hi': 500.4
+    maroon = {"aqi_low": 301,
+              "aqi_hi": 500,
+              "pm_low": 250.5,
+              "pm_hi": 500.4
              }
     
     colors = [green, yellow, orange, red, purple, maroon]
@@ -141,7 +144,7 @@ def aqi(pm25):
     
     # assign measurement to AQI category
     for color in colors:
-        if pm25 >= color['pm_low'] and pm25 <= color['pm_hi']:
+        if pm25 >= color["pm_low"] and pm25 <= color["pm_hi"]:
             cat = color
             categorized = True
             break
@@ -153,15 +156,11 @@ def aqi(pm25):
         cat = colors[-1] 
         
     # EPA formula
-    aqi  = (cat['aqi_hi']-cat['aqi_low']) * (pm25-cat['pm_low']) / (cat['pm_hi']-cat['pm_low']) + cat['aqi_low']
+    aqi  = (cat["aqi_hi"]-cat["aqi_low"]) * (pm25-cat["pm_low"]) / (cat["pm_hi"]-cat["pm_low"]) + cat["aqi_low"]
     
     return aqi
     
         
-        
-        
-
-
 
 ################################################################################
 ############################## Class Definitions ###############################
@@ -169,7 +168,7 @@ def aqi(pm25):
 
 
 class DataStream:
-    '''
+    """
     The DataStream class basically equates to a single CSV data file.
     
     Each purple air sensor should have four data streams (primary and secondary streams for two different channels)
@@ -182,7 +181,7 @@ class DataStream:
             - lat/lon: sensor coordinates
     
     
-    '''
+    """
     
     def __init__(self,filepath):
 
@@ -201,10 +200,10 @@ class DataStream:
         """
         
         self.filepath = filepath #full file path
-        self.filename = filepath.split('./data/purple_air/')[1] # file name
+        self.filename = filepath.split("./data/purple_air/")[1] # file name
         
 
-        #### Find the sensor's location 
+        #### Find the sensor"s location 
         loc_options = ["(inside)", "(outside)", "(undefined)"]
         
         #loop through the three location options
@@ -220,25 +219,25 @@ class DataStream:
                 
                 
                 ### Get channel (A or B; only channel B files have the channel in the file name)
-                if self.sensor_name.endswith(' B'): 
-                    self.channel = 'B'
+                if self.sensor_name.endswith(" B"): 
+                    self.channel = "B"
                     self.sensor_name = self.sensor_name[:-1].strip().lower() #remove the channel from the sensor name
                 else: 
-                    self.channel = 'A'
+                    self.channel = "A"
                     self.sensor_name = self.sensor_name.lower() #make lowercase
                     
                     
                 ### Determine data type
-                if 'Primary' in data_info:
+                if "Primary" in data_info:
                     self.data_type = 1 #primary 
-                elif 'Secondary' in data_info:
+                elif "Secondary" in data_info:
                     self.data_type = 2 #secondary 
                 else:
                     self.data_type = 0 #unknown
                         
                 
                 ### Get lat/lon coordinates
-                latlon_pattern = r'\([0-9]+.[0-9]+ [-]+[0-9]+.[0-9]+\)' #regex search pattern for lat/lon coordinates separated by a space
+                latlon_pattern = r"\([0-9]+.[0-9]+ [-]+[0-9]+.[0-9]+\)" #regex search pattern for lat/lon coordinates separated by a space
                 search_result = re.search(latlon_pattern, data_info) #search the file name
                 
                 if search_result: #found coordinates
@@ -272,8 +271,8 @@ class DataStream:
         # grabs the minimum time of the time field from the CSV
         start_time = pd.read_csv(self.filepath).created_at.min()
         
-        # remove time zone if it's there
-        if start_time.endswith('UTC'):
+        # remove time zone if it"s there
+        if start_time.endswith("UTC"):
             start_time = start_time[:-3].strip()
         else:
             pass
@@ -291,7 +290,7 @@ class DataStream:
         """
         
         # read into an xarray dataset via a dataframe
-        df = pd.read_csv(self.filepath, index_col='created_at')
+        df = pd.read_csv(self.filepath, index_col="created_at")
         ds = xr.Dataset.from_dataframe(df)
                 
         #drop some unneeded/artifact fields
@@ -306,31 +305,31 @@ class DataStream:
         
         
         # make some friendlier names for the data fields
-        rename = {'created_at':'time',
-                  'Pressure_hpa': 'pressure',
-                  'PM1.0_CF1_ug/m3': 'pm1_cf1',
-                  'PM2.5_CF1_ug/m3': 'pm25_cf1',
-                  'PM10.0_CF1_ug/m3': 'pm10_cf1',
-                  'PM2.5_ATM_ug/m3': 'pm25_atm',
-                  'PM1.0_ATM_ug/m3': 'pm1_atm',
-                  'PM10_ATM_ug/m3': 'pm10_atm',
-                  'UptimeMinutes': 'uptime',
-                  'Temperature_F': 'temp',
-                  'Humidity_%': 'rh'
+        rename = {"created_at":"time",
+                  "Pressure_hpa": "pressure",
+                  "PM1.0_CF1_ug/m3": "pm1_cf1",
+                  "PM2.5_CF1_ug/m3": "pm25_cf1",
+                  "PM10.0_CF1_ug/m3": "pm10_cf1",
+                  "PM2.5_ATM_ug/m3": "pm25_atm",
+                  "PM1.0_ATM_ug/m3": "pm1_atm",
+                  "PM10_ATM_ug/m3": "pm10_atm",
+                  "UptimeMinutes": "uptime",
+                  "Temperature_F": "temp",
+                  "Humidity_%": "rh"
                  }
-                  #'>=0.3um/dl': 'n_pm03',
-                  #'>=0.5um/dl': 'n_pm05',
-                  #'>1.0um/dl': 'n_pm1',
-                  #'>=2.5um/dl': 'n_pm25',
-                  #'>=5.0um/dl': 'n_pm5',
-                  #'>=10.0um/dl': 'n_pm10',
+                  #">=0.3um/dl": "n_pm03",
+                  #">=0.5um/dl": "n_pm05",
+                  #">1.0um/dl": "n_pm1",
+                  #">=2.5um/dl": "n_pm25",
+                  #">=5.0um/dl": "n_pm5",
+                  #">=10.0um/dl": "n_pm10",
                   
         
         # mark data fields from channel B
-        #if self.channel == 'B':
+        #if self.channel == "B":
         #    for key in rename.keys():
-        #        if key != 'created_at' and key != 'Pressure_hpa': 
-        #            rename[key] = rename[key]+'b'
+        #        if key != "created_at" and key != "Pressure_hpa": 
+        #            rename[key] = rename[key]+"b"
         
         #loop through and rename the variables
         for old_name, new_name in rename.items():
@@ -341,37 +340,37 @@ class DataStream:
         
         
         # assign units
-        ug_m3 = ['pm1', 'pm25', 'pm10', 'pm25_atm', 'pm1_atm', 'pm10_atm']
-        #per_dl = ['pm03_n', 'pm05_n', 'pm10_n', 'pm25_n', 'pm50_n', 'pm100_n']
+        ug_m3 = ["pm1", "pm25", "pm10", "pm25_atm", "pm1_atm", "pm10_atm"]
+        #per_dl = ["pm03_n", "pm05_n", "pm10_n", "pm25_n", "pm50_n", "pm100_n"]
         
         for field in ds.keys():
             if field in ug_m3:
-                ds[field].attrs['units'] = 'ug/m3'
+                ds[field].attrs["units"] = "ug/m3"
             #elif field in per_dl:
-            #    ds[field].attrs['units'] = '/dl'
-            elif field == 'temp':
-                ds[field].attrs['units'] = 'F'
-            elif field == 'pressure':
-                ds[field].attrs['units'] = 'hpa'
-            elif field == 'rh':
-                ds[field].attrs['units'] = '%'
+            #    ds[field].attrs["units"] = "/dl"
+            elif field == "temp":
+                ds[field].attrs["units"] = "F"
+            elif field == "pressure":
+                ds[field].attrs["units"] = "hpa"
+            elif field == "rh":
+                ds[field].attrs["units"] = "%"
             else:
                 pass
                 
         # convert time to numpy datetimes
         time = []
         for t in ds.time.values:
-            if t.endswith('UTC'):
+            if t.endswith("UTC"):
                 time.append(np.datetime64(t[:-3].strip()))
             else:
                 time.append(np.datetime64(t))
-        ds['time'] = (('time'), np.array(time))
+        ds["time"] = (("time"), np.array(time))
 
         # add some attributes with the DataStream info
-        ds.attrs['sensor_name'] = self.sensor_name
-        ds.attrs['channel'] = self.channel
-        ds.attrs['loc'] = self.loc
-        ds.attrs['data_type'] = self.data_type
+        ds.attrs["sensor_name"] = self.sensor_name
+        ds.attrs["channel"] = self.channel
+        ds.attrs["loc"] = self.loc
+        ds.attrs["data_type"] = self.data_type
 
         return ds
     
@@ -430,7 +429,7 @@ class Sensor:
         ###### Check that each DataStream has a valid channel
         
         channels = [stream.channel for stream in data_streams] # channels for each DataStream
-        if any((channel != 'A' and channel != 'B') for channel in channels):
+        if any((channel != "A" and channel != "B") for channel in channels):
             raise ValueError("DataStreams much have valid channel IDs ('A' or 'B')")
            
         #############
@@ -457,14 +456,14 @@ class Sensor:
         ###### Get sensor location (outside, inside, or undefined)
         locs = set([stream.loc for stream in data_streams])
         
-        if 'inside' in locs and 'outside' in locs:
+        if "inside" in locs and "outside" in locs:
             raise ValueError("Some DataStreams are inside and some are outside...")
-        elif 'inside' in locs:
-            self.loc = 'inside'
-        elif 'outside' in locs:
-            self.loc = 'outside'
+        elif "inside" in locs:
+            self.loc = "inside"
+        elif "outside" in locs:
+            self.loc = "outside"
         else:
-            self.loc = 'undefined'
+            self.loc = "undefined"
             
         #############
         ###### Validation finished
@@ -474,13 +473,13 @@ class Sensor:
         
         #loop through DataStreams and assign them according to channel and data type
         for stream in data_streams: 
-            if stream.channel == 'A' and stream.data_type == 1:
+            if stream.channel == "A" and stream.data_type == 1:
                 self.A1 = stream
-            elif stream.channel == 'A' and stream.data_type == 2:
+            elif stream.channel == "A" and stream.data_type == 2:
                 self.A2 = stream
-            elif stream.channel == 'B' and stream.data_type == 1:
+            elif stream.channel == "B" and stream.data_type == 1:
                 self.B1 = stream
-            elif stream.channel == 'B' and stream.data_type == 2:
+            elif stream.channel == "B" and stream.data_type == 2:
                 self.B2 = stream
             else:
                 pass
@@ -522,70 +521,70 @@ class Sensor:
         time = a1.time
         
         # start our new output dataset
-        ds = xr.Dataset(coords={'time':time})
+        ds = xr.Dataset(coords={"time":time})
         
         # add in some station info
-        ds.attrs = {'sensor_name': self.name,
-                    'location': self.loc}
+        ds.attrs = {"sensor_name": self.name,
+                    "location": self.loc}
         
         # add our supplemental fields
-        ds = ds.assign({'lat': self.lat,
-                        'lon': self.lon,
-                        'temp': a1.temp,
-                        'rh': a1.rh,
-                        'pressure': b1.pressure,
-                        'uptime': a1.uptime})
+        ds = ds.assign({"lat": self.lat,
+                        "lon": self.lon,
+                        "temp": a1.temp,
+                        "rh": a1.rh,
+                        "pressure": b1.pressure,
+                        "uptime": a1.uptime})
         
         #############
         ###### Add in our PM data
         
-        if self.loc == 'inside': # inside -> use CF=1 data
-            ds = ds.assign({'pm1': a1.pm1_cf1,
-                            'pm25': a1.pm25_cf1,
-                            'pm10': a1.pm10_cf1,
-                            'pm1b': b1.pm1_cf1, # channel B
-                            'pm25b': b1.pm25_cf1,
-                            'pm10b': b1.pm10_cf1})
+        if self.loc == "inside": # inside -> use CF=1 data
+            ds = ds.assign({"pm1": a1.pm1_cf1,
+                            "pm25": a1.pm25_cf1,
+                            "pm10": a1.pm10_cf1,
+                            "pm1b": b1.pm1_cf1, # channel B
+                            "pm25b": b1.pm25_cf1,
+                            "pm10b": b1.pm10_cf1})
             
         else: #outside or unknown -> use CF=ATM data
-            ds = ds.assign({'pm1': a2.pm1_atm,
-                            'pm25': a1.pm25_atm,
-                            'pm10': a2.pm10_atm,
-                            'pm1b': b2.pm1_atm, # channel B
-                            'pm25b': b1.pm25_atm,
-                            'pm10b': b2.pm10_atm})
+            ds = ds.assign({"pm1": a2.pm1_atm,
+                            "pm25": a1.pm25_atm,
+                            "pm10": a2.pm10_atm,
+                            "pm1b": b2.pm1_atm, # channel B
+                            "pm25b": b1.pm25_atm,
+                            "pm10b": b2.pm10_atm})
             
         #############
         ###### Calculate AQI
         vec_aqi = np.vectorize(aqi)
-        ds['aqi'] = (('time'), vec_aqi(ds.pm25))
+        ds["aqi"] = (("time"), vec_aqi(ds.pm25))
         
         # add descriptive names and units
-        fields = ['pm1','pm25','pm10','pm1b','pm25b','pm10b']
-        particle_sizes = ['1.0','2.5','10']*2
-        channels = 3*['A']+3*['B']
+        fields = ["pm1","pm25","pm10","pm1b","pm25b","pm10b"]
+        particle_sizes = ["1.0","2.5","10"]*2
+        channels = 3*["A"]+3*["B"]
         
         for field, size, channel in zip(fields, particle_sizes, channels):
-            ds[field].attrs = {'name': f'Concentration of particles smaller than {size} micron (Channel {channel})',
-                               'units': 'ug/m3'}
+            ds[field].attrs = {"name": f"Concentration of particles smaller than {size} micron (Channel {channel})",
+                               "units": "ug/m3"}
            
         
         #############
         ###### Add in our number concentration data
         
         """     
-        num_fields = ['n_pm03','n_pm05','n_pm1','n_pm25','n_pm5','n_pm10']
-        particle_sizes = ['0.3','0.5','1.0','2.5','5.0','10.0']
+        num_fields = ["n_pm03","n_pm05","n_pm1","n_pm25","n_pm5","n_pm10"]
+        particle_sizes = ["0.3","0.5","1.0","2.5","5.0","10.0"]
         
         for field, size in zip(num_fields, particle_sizes): # loop through field names
             
             ds = ds.assign({field: a2[field],
-                            field+'b': b2[field]})
+                            field+"b": b2[field]})
             
-            ds[field].attrs = {'name': f'Number concentration of particles smaller than {size} micron (Channel A)',
-                               'units': 'dl-1'} #attributes for Channel A
+            ds[field].attrs = {"name": f"Number concentration of particles smaller than {size} micron (Channel A)",
+                               "units": "dl-1"} #attributes for Channel A
             
-            ds[field+'b'].attrs = {'name': f'Number concentration of particles smaller than {size} micron (Channel A)',
-                               'units': 'dl-1'} #attributes for Channel B
+            ds[field+"b"].attrs = {"name": f"Number concentration of particles smaller than {size} micron (Channel A)",
+                               "units": "dl-1"} #attributes for Channel B
         """
         return ds
