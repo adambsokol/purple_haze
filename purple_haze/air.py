@@ -14,38 +14,152 @@ import numpy as np
 
 
 
-
-
 ################################################################################
 ################################## Functions ###################################
 ################################################################################
 
 
 def files_to_dataframe(file_list):
-    '''
-    This function creates a pandas dataframe with one row for each file in the input file_list and one column for each of the default attributes of the DataStream class.
-    '''
+    """Makes dataframe of Purple Air CSV files
+    
+    This function creates a pandas dataframe with one row for each file in
+    the input file_list and one column for each of the default attributes
+    of the DataStream class.
+    
+    Arguments:
+        - file_list (iterable of strings): names of files to include in
+        dataframe
+    Outputs:
+        - df (pandas DataFrame): contains one row for each CSV file in 
+        file_list and columns indicating the file name, latitude, 
+        longitude, sensor name, location, channel, and data type.
+    
+    '"""
     
     # convert file names to list of DataStream objects
-    data_streams = [DataStream(file) for file in file_list]
+    streams = [DataStream(file) for file in file_list]
     
     # make dataframe
     df = pd.DataFrame({'file': file_list,
-                      'lat': [stream.lat for stream in data_streams],
-                      'lon': [stream.lon for stream in data_streams],
-                      'sensor_name': [stream.sensor_name for stream in data_streams],
-                      'loc': [stream.loc for stream in data_streams],
-                      'channel': [stream.channel for stream in data_streams],
-                      'data_type': [stream.data_type for stream in data_streams]
+                      'lat': [st.lat for st in streams],
+                      'lon': [st.lon for st in streams],
+                      'sensor_name': [st.sensor_name for st in streams],
+                      'loc': [st.loc for st in streams],
+                      'channel': [st.channel for st in streams],
+                      'data_type': [st.data_type for st in streams]
                       })
-    
     return df
+
+
+
+def tract_files_to_sensors(tract_files):
+    """Converts list of CSV file names to list of Sensor instances.
     
+    Groups CSV files by sensor and initiates a Sensor class instance.
+    
+    Arguments:
+        - tract_files (iterable of string): list of the paths of CSV 
+        files for Purple Air data located within a specific census
+        tract. 
+    Outputs:
+        - sensors (list of Sensor instances): one Sensor for each 
+        Purple Air sensor in the census tract. 
+    """
+    
+    #make DataStream instance from each CSV file
+    streams = [DataStream(file) for file in tract_files]
+    
+    # use sensor name and lat to identify different sensors
+    sens_info = set([(st.sensor_name, st.lat) for st in streams])
+    
+    # group DataStreams by sensor
+    sens_stream_lists = [] 
+    for (name, lat) in sens_info: 
+        
+        # grabs list of DataStreams with matching info
+        sens_streams = [st for st in streams if st.sensor_name == name and st.lat == lat]
+        
+        sens_stream_lists.append(sens_streams)
+        
+    # initiate Sensor instance for each group of matching DataStreams
+    sensors = [Sensor(sens_streams) for sens_streams in sens_stream_lists]
+
+    return sensors
 
 
+def aqi(pm25):
+    """AQI Calculator
+    
+    Calculates AQI from PM2.5 using EPA formula and breakpoints from:
+    https://www.airnow.gov/sites/default/files/2018-05/aqi-technical-assistance-document-may2016.pdf
+    """
+    
+    if pm25 < 0:
+        raise ValueError("PM2.5 must be positive.")
+    else:
+        # round PM2.5 to nearest tenth for categorization
+        pm25 = np.round(pm25, 1)
+        
+    green = {'aqi_low': 0,
+             'aqi_hi': 50,
+             'pm_low': 0.0,
+             'pm_hi': 12.0
+            }
+    
+    yellow = {'aqi_low': 51,
+              'aqi_hi': 100,
+              'pm_low': 12.1,
+              'pm_hi': 35.4
+             }
+    
+    orange = {'aqi_low': 101,
+              'aqi_hi': 150,
+              'pm_low': 35.5,
+              'pm_hi': 55.4
+             }
+    
+    red = {'aqi_low': 151,
+           'aqi_hi': 200,
+           'pm_low': 55.5,
+           'pm_hi': 150.4
+          }
+    
+    purple = {'aqi_low': 201,
+              'aqi_hi': 300,
+              'pm_low': 150.5,
+              'pm_hi': 250.4
+             }
+    
+    maroon = {'aqi_low': 301,
+              'aqi_hi': 400,
+              'pm_low': 250.5,
+              'pm_hi': 500.4
+             }
+    
+    colors = [green, yellow, orange, red, purple, maroon]
+    categorized = False
+    
+    # assign measurement to AQI category
+    for color in colors:
+        if pm25 >= color['pm_low'] and pm25 <= color['pm_hi']:
+            cat = color
+            categorized = True
+            break
+        else:
+            pass
 
-
-
+    # put in highest category if still not assigned
+    if categorized == False:
+        cat = colors[-1] 
+        
+    # EPA formula
+    aqi  = (cat['aqi_hi']-cat['aqi_low']) * (pm25-cat['pm_low']) / (cat['pm_hi']-cat['pm_low']) + cat['aqi_low']
+    
+    return aqi
+    
+        
+        
+        
 
 
 
@@ -142,44 +256,47 @@ class DataStream:
         if not found_loc:
             raise ValueError("Could not determine sensor location (inside/outside/undefined) from file name.")
                 
-
-                
-    
-    
     def start_time(self):
-        '''
-        Determines when the DataStream's record begins.
+        """Finds beginning of data record.
+        
         The study period spans from 05-01-2020 to 11-01-2020.
-        Sensors that were up and running at the beginning of this period will return a start time of May 1.
-        Inputs:
+        Sensors that were up and running at the beginning of this
+        period will return a start time of May 1.
+        Arguments:
             - None
         Output:
-            - start_time_dt (pandas timestamp): datetime corresponding to the first measurements in the DataStream. If the DataStream's time field is empty, function returns NaT (pandas Not-a-Time)
-        '''
+            - start_time_dt (numpy datetime): the first measurements in
+            the DataStream.
+        """
         
-        #grabs the minimum time of the time field from the CSV
+        # grabs the minimum time of the time field from the CSV
         start_time = pd.read_csv(self.filepath).created_at.min()
-            
-        return pd.to_datetime(start_time)
+        
+        # remove time zone if it's there
+        if start_time.endswith('UTC'):
+            start_time = start_time[:-3].strip()
+        else:
+            pass
     
-    
-    
-    
+        return np.datetime64(start_time)
     
     def load(self):
-        '''
+        """
         Reads in the DataStream's data from corresponding CSV file.
         Converts to an xarray dataset.
         Inputs:
             - None
         Outputs:
             - ds (xarray dataset)
-        '''
-        # read into an xarray dataset
-        ds = xr.Dataset.from_dataframe(pd.read_csv(self.filepath, index_col='created_at'))
+        """
+        
+        # read into an xarray dataset via a dataframe
+        df = pd.read_csv(self.filepath, index_col='created_at')
+        ds = xr.Dataset.from_dataframe(df)
                 
         #drop some unneeded/artifact fields
-        dropvars = ['Unnamed: 9', 'RSSI_dbm', 'IAQ', 'ADC']
+        dropvars = ["Unnamed: 9", "RSSI_dbm", "IAQ", "ADC"]
+        dropvars = dropvars + [k for k in ds.keys() if k.startswith(">")]
         
         for dropvar in dropvars:
             if dropvar in ds:
@@ -188,29 +305,31 @@ class DataStream:
                 pass
         
         
-        # lets make some friendlier names for the data fields
+        # make some friendlier names for the data fields
         rename = {'created_at':'time',
                   'Pressure_hpa': 'pressure',
                   'PM1.0_CF1_ug/m3': 'pm1_cf1',
                   'PM2.5_CF1_ug/m3': 'pm25_cf1',
                   'PM10.0_CF1_ug/m3': 'pm10_cf1',
-                  '>=0.3um/dl': 'n_pm03',
-                  '>=0.5um/dl': 'n_pm05',
-                  '>1.0um/dl': 'n_pm1',
-                  '>=2.5um/dl': 'n_pm25',
-                  '>=5.0um/dl': 'n_pm5',
-                  '>=10.0um/dl': 'n_pm10',
                   'PM2.5_ATM_ug/m3': 'pm25_atm',
                   'PM1.0_ATM_ug/m3': 'pm1_atm',
                   'PM10_ATM_ug/m3': 'pm10_atm',
                   'UptimeMinutes': 'uptime',
                   'Temperature_F': 'temp',
-                  'Humidity_%': 'rh'}
+                  'Humidity_%': 'rh'
+                 }
+                  #'>=0.3um/dl': 'n_pm03',
+                  #'>=0.5um/dl': 'n_pm05',
+                  #'>1.0um/dl': 'n_pm1',
+                  #'>=2.5um/dl': 'n_pm25',
+                  #'>=5.0um/dl': 'n_pm5',
+                  #'>=10.0um/dl': 'n_pm10',
+                  
         
-        # if we have Channel B data, let's add that to the dataset variable names
+        # mark data fields from channel B
         #if self.channel == 'B':
         #    for key in rename.keys():
-        #        if key != 'created_at' and key != 'Pressure_hpa': #Pressure field is only in channel B data
+        #        if key != 'created_at' and key != 'Pressure_hpa': 
         #            rename[key] = rename[key]+'b'
         
         #loop through and rename the variables
@@ -221,15 +340,15 @@ class DataStream:
                 pass
         
         
-        # lets assign some units
+        # assign units
         ug_m3 = ['pm1', 'pm25', 'pm10', 'pm25_atm', 'pm1_atm', 'pm10_atm']
-        per_dl = ['pm03_n', 'pm05_n', 'pm10_n', 'pm25_n', 'pm50_n', 'pm100_n']
+        #per_dl = ['pm03_n', 'pm05_n', 'pm10_n', 'pm25_n', 'pm50_n', 'pm100_n']
         
         for field in ds.keys():
             if field in ug_m3:
                 ds[field].attrs['units'] = 'ug/m3'
-            elif field in per_dl:
-                ds[field].attrs['units'] = '/dl'
+            #elif field in per_dl:
+            #    ds[field].attrs['units'] = '/dl'
             elif field == 'temp':
                 ds[field].attrs['units'] = 'F'
             elif field == 'pressure':
@@ -239,7 +358,7 @@ class DataStream:
             else:
                 pass
                 
-        # convert the time field to datetimes
+        # convert time to numpy datetimes
         time = []
         for t in ds.time.values:
             if t.endswith('UTC'):
@@ -267,14 +386,14 @@ class DataStream:
     
     
 class Sensor:
-    '''
+    """
     A Sensor instance describes one physical purple air sensor (and its unique location). 
 
     Each sensor has a name and lat/lon coordinates. The name of the sensor is not necessarily unique (since some names are just the neighborhood where the sensor is, and many neighborhoods have multiple sensors). But each sensor has a unique combination of name and lat/lon coordinates.
 
     Each Sensor instance is initialized with a list of its four correspondinig DataStream instances (see DataStreams.py).
     Each sensor has two channels (lasers) and two datasets (primary and secondary), for a total of 4 data files for each sensor
-    '''
+    """
     
     def __init__(self, data_streams):
         
@@ -365,32 +484,23 @@ class Sensor:
                 self.B2 = stream
             else:
                 pass
-            
-    
     
     def start_time(self):
-        '''
-        Determines the earliest date and time for which data is available from the sensor.
-        This is equivalent to the earliest start time among the sensor's four DataStreams (data from all four streams need not be available at the start time)
+        """ Finds beginning of data record.
         
+        If the Sensor's DataStreams have different start times, the earliest is returned.
+
         Inputs:
             -None
         Output:
-            -start_time (pandas timestamp): the time of the first sensor measurement. If none of the Sensor's DataStreams have time information, NaT is returned (pandas Not-a-Time)
-        '''
+            -start_time (numpy datetime): time of the first measurement
+        """
         start_times = pd.Series([stream.start_time() for stream in self.datastreams])
-        
         start_time = start_times.min()
-
-       
         return start_time
             
-            
-    
-    
-        
     def load(self):
-        '''
+        """
         Loads and combines data from the sensor's DataStreams and returns as xarray Dataset.
         If the sensor is inside, we use the CF=1 data fields (CF is correction factor).
         If it's outside, we use the CF=ATM data fields.
@@ -400,7 +510,7 @@ class Sensor:
             - None
         Output: 
             - ds (xarray dataset): combined data from the sensor's DataStreams
-        '''
+        """
         
         # load in the four datastreams from the sensor and get the time coordinate
         a1 = self.A1.load()
@@ -444,6 +554,11 @@ class Sensor:
                             'pm1b': b2.pm1_atm, # channel B
                             'pm25b': b1.pm25_atm,
                             'pm10b': b2.pm10_atm})
+            
+        #############
+        ###### Calculate AQI
+        vec_aqi = np.vectorize(aqi)
+        ds['aqi'] = (('time'), vec_aqi(ds.pm25))
         
         # add descriptive names and units
         fields = ['pm1','pm25','pm10','pm1b','pm25b','pm10b']
@@ -458,6 +573,7 @@ class Sensor:
         #############
         ###### Add in our number concentration data
         
+        """     
         num_fields = ['n_pm03','n_pm05','n_pm1','n_pm25','n_pm5','n_pm10']
         particle_sizes = ['0.3','0.5','1.0','2.5','5.0','10.0']
         
@@ -471,6 +587,5 @@ class Sensor:
             
             ds[field+'b'].attrs = {'name': f'Number concentration of particles smaller than {size} micron (Channel A)',
                                'units': 'dl-1'} #attributes for Channel B
-            
-        
+        """
         return ds
