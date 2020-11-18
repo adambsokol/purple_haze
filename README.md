@@ -1,6 +1,6 @@
 # Purple Haze
 
-### A Local Urban Investigation on the Correlation Between Air Quality and Socioeconomic Status
+### A Local Urban Investigation on the Correlation Between Air Quality, Demographics, and Socioeconomic and Health Disadvantages
 
 It has been established that air pollution and health effects associated with it disproportionately affect poorer people and some racial and ethnic groups. With the advent of the PurpleAir air quality monitoring network in 2015, a variety of consumers within the governmental, industry, and educational sectors as well as citizen scientists and home enthusiasts have been able to record and share localized air quality data. PurpleAir air quality sensors are relatively cheap (~$250), providing more localized, more current, though less accurate readings compared to AirNow, an air quality network managed through the partnership of multiple government entities. Seattle’s PurpleAir network has expanded with the occurrence of wildfire smoke the past few years. Purple Haze is an analysis project to answer the following questions: 
 
@@ -27,15 +27,19 @@ The project has the following structure:
 ```
 purple_haze/
    |- data/
-      |- WA_census_tracts/
-         |- ...
       |- purple_air/
          |- ...
       |- seattle_ses_data/
          |- ...
-   |- doc/
+   |- docs/
+      |- Technology Review.pptx
+      |- component_specification.md
+      |- functional_specification.md
    |- examples/
    |- purple_haze/
+      |- __init__.py
+      |- air.py
+      |- matcher.py
    |- setup.py
    |- LICENSE
    |- README.md
