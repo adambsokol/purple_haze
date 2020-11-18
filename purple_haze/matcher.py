@@ -34,7 +34,7 @@ def station_matcher(data_stream_df):
     
     '''
     
-    ses_file = '../data/Seattle_ses_data/ses_data.shp'
+    ses_file = '../data/seattle_ses_data/ses_data.shp'
     ses_data = gpd.read_file(ses_file)
     #Converting it to what is the default lat/lon format
     new_ses_data = ses_data.to_crs(epsg=4326)
