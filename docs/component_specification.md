@@ -10,7 +10,9 @@ We will use the term *sensor* to refer to a single Purple Air monitoring unit th
 4. Channel B (Secondary)
 
 All of the CSV files for this project are kept in a single directory (i.e., they are not organized by sensor). The purpose of this component is to retrieve the lat/lon coordinates and location (indoors or outdoors) for each data stream and to assign each data stream to its correct census tract. The pieces of information needed to accomplish this can all be obtained from the CSV file names themselves (reading the files is not necessary) and the census tract shape files. 
+
 **Inputs**: list of CSV file paths; paths to census tract shape files
+
 **Outputs**: single geopandas dataframe containing socioeconomic data and data stream file paths for each census tract
 
 ##### 2. Reading & Analyzing Purple Air Data
@@ -22,6 +24,7 @@ This component reads and manipulates air quality data once the data streams have
 - calculating air quality statistics for each census tract
 
 **Inputs**: geopandas dataframe containing socioeconomic data and data stream file paths for each census tract
+
 **Outputs**: the input dataframe with added air quality statistical variables for each census tract
 
 ##### 3. Visualization
@@ -31,6 +34,7 @@ The visualization component allows users to access and understand the data in a 
 - Provide the user with the option to view and explore the data using different racial and socioeconomic metrics
 
 **Inputs**: geopandas dataframe containing socioeconomic data and air quality statistics for each census tract calculated from Purple Air sensors
+
 **Outputs**: a variety of plots, with optional user input, in a Jupyter notebook to explore relationships between Purple Air sensor locations, air quality data, and socioeconomic data
 
 ## Interactions
