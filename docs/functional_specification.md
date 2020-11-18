@@ -13,7 +13,7 @@ Our primary user is a researcher. The researcher will use our package to easily 
 
 ### Data Sources
 
-##### PurpleAir
+#### PurpleAir
 PurpleAir is an air quality monitoring network maintained by their low-cost air quality monitors purchased by organizations, citizen scientists, and home enthusiasts. PurpleAir air quality monitors use laser counters to measure particulate matter in real time. As a single particle passes through a laser, some of scattered laser light off of the particle will hit a detection plate, where the length of the laser light pulse determines particle size and the number of laser light pulses determines particle counts. Some assumptions in particle density and shape are employed to convert laser pulse length to particle mass concentration. The PurpleAir air quality monitor uses two lasers for data output, Channel A and Channel B, to ensure air quality measurements are precise.
 
 For each PurpleAir air quality monitor, which we will now refer to as "sensor," the data is available as four separate CSV files named with the following format: ``Sensor Name _ (Location) (Latitude Longitude) Order #_minute_average mm_dd_yyyy mm_dd_yyyy.csv`` where:
@@ -46,7 +46,7 @@ Primary files contain the following variables, where CF denotes indoor/controlle
 
 Secondary files contain the following variables:
 * Creation time (yyyy-mm-dd hh:mm:ss UTC)
-*  0.3um (particles/deciliter)
+* 0.3um (particles/deciliter)
 * 0.5um (particles/deciliter)
 * 1.0um (particles/deciliter)
 * 2.5um (particles/deciliter)
@@ -59,7 +59,7 @@ For our analysis project, we chose to include all PurpleAir sensors located and 
 
 Source: https://www.purpleair.com/map
 
-##### Seattle's Racial and Social Equity Composite Index
+#### Seattle's Racial and Social Equity Composite Index
 Seattle is a city with an Open Data Program, a program whose purpose is to make data created by the city of Seattle publicly accessible. One of these publicly available datasets is the Racial and Social Equity Composite Index (RSECI). Information on race, ethnicity, and other demographics are combined with socioeconomic and health disadvantages data to locate where priority populations are residing. 
 
 The following demographic, socioeconomic, and health metrics are provided by the city of Seattle at the census tract level:
@@ -86,9 +86,9 @@ Source: https://data.seattle.gov/dataset/Racial-and-Social-Equity-Composite-Inde
 
 ### Use Cases
 
-##### Use Case 1: Find the number of PurpleAir sensors within a census tract in Seattle.
+#### Use Case 1: Find the number of PurpleAir sensors within a census tract in Seattle.
 * The user will be able to look at our visualization to get a broad sense of PurpleAir sensor distribution among the census tracts. 
 * The user will be able to use Python with the Jupyter Notebook to make inquiries within our GeoPandas dataframe.
 
-##### Use Case 2: Compute the PM2.5 and AQI averages for each census tract in Seattle.
+#### Use Case 2: Compute the PM2.5 and AQI averages for each census tract in Seattle.
 * The user will hover over a census tract in our visualization and will generate a tooltip containing census identification, summary statistics of PM2.5 and AQI, and the Composite Index for that census tract.
