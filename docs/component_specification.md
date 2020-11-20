@@ -21,7 +21,7 @@ This component reads and manipulates air quality data once the data streams have
 - determining which data variables are to be used for analysis (this depends on whether the sensor is indoors or outdoors)
 - calculating Air Quality Index (AQI)
 - combining data from all of the sensors located within a single census tract
-- calculating air quality statistics for each census tract
+- calculating air quality statistics for each census tract, including correlations with socioeconomiic indicators
 
 **Inputs**: geopandas dataframe containing socioeconomic data and data stream file paths for each census tract
 
@@ -39,11 +39,14 @@ The visualization component allows users to access and understand the data in a 
 
 ## Interactions
 
-##### 1. User can select which socioeconomic metric they would like to use. This metric will then be regressed against Purple Air sensors and air quality data by census tract and displayed with appropriate plots. 
+##### 1. User can select which socioeconomic metric they would like to use. This metric will then be regressed against Purple Air sensors and air quality data by census tract and displayed with appropriate plots. This requires interaction between our data analysis component (#2) and our visualization component (#3).
 
-##### 2. The user can hover over a map of Seattle and select data from a single census tract. This selection will then display socioeconomic data, quantity of Purple Air sensors, and air quality data for that census tract.
+##### 2. The user can hover over a map of Seattle and select data from a single census tract. This selection will then display socioeconomic data, quantity of Purple Air sensors, and air quality data for that census tract. This requires interactions between all three components.
 
 ## Preliminary Plan
- - Determine visualization engine
+ 1. Configure our continuous integration setup. 
+ 2. Determine visualization engine. As of now, we are still uncertain about how we will present our interactive maps and whether these maps will be embedded in a Jupyter notebook or some other format. 
+ 3. Determine statistical relationships to be visualized. 
+ 4. Implement thorough testing using unittest. 
 
  
