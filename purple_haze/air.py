@@ -1,7 +1,8 @@
 """
 Air module of the purple_haze package.
 
-Contains class definitions for the Sensor and DataStream classes as well as some functions. 
+Contains class definitions for the Sensor and DataStream classes as
+well as some functions.
 """
 
 import re
@@ -9,14 +10,14 @@ import xarray as xr
 import pandas as pd
 import numpy as np
 
-# Functions
+#### Functions
 
 def files_to_dataframe(file_list):
     """Makes dataframe of Purple Air CSV files
     
-    This function creates a pandas dataframe with one row for each file in
-    the input file_list and one column for each of the default attributes
-    of the DataStream class.
+    This function creates a pandas dataframe with one row for each file
+    in the input file_list and one column for each of the default 
+    attributes of the DataStream class.
     
     Arguments:
         - file_list (iterable of strings): names of files to include in
@@ -25,8 +26,7 @@ def files_to_dataframe(file_list):
         - df (pandas DataFrame): contains one row for each CSV file in 
         file_list and columns indicating the file name, latitude, 
         longitude, sensor name, location, channel, and data type.
-    
-    '"""
+    """
     
     # convert file names to list of DataStream objects
     streams = [DataStream(file) for file in file_list]
@@ -43,11 +43,12 @@ def files_to_dataframe(file_list):
     return df
 
 
+
 def tract_files_to_sensors(tract_files):
     """Converts list of CSV file names to list of Sensor instances.
     
     Groups CSV files by sensor and initiates a Sensor class instance.
-  
+    
     Arguments:
         - tract_files (iterable of string): list of the paths of CSV 
         files for Purple Air data located within a specific census
@@ -57,7 +58,7 @@ def tract_files_to_sensors(tract_files):
         Purple Air sensor in the census tract. 
     """
     
-    # make DataStream instance from each CSV file
+    #make DataStream instance from each CSV file
     streams = [DataStream(file) for file in tract_files]
     
     # use sensor name and lat to identify different sensors
@@ -70,6 +71,7 @@ def tract_files_to_sensors(tract_files):
         # grabs list of DataStreams with matching info
         sens_streams = [st for st in streams \
                         if st.sensor_name == name and st.lat == lat]
+        
         sens_stream_lists.append(sens_streams)
         
     # initiate Sensor instance for each group of matching DataStreams
@@ -82,7 +84,8 @@ def aqi(pm25):
     """AQI Calculator
     
     Calculates AQI from PM2.5 using EPA formula and breakpoints from:
-    https://www.airnow.gov/sites/default/files/2018-05/aqi-technical-assistance-document-may2016.pdf
+    https://www.airnow.gov/sites/default/files/2018-05/aqi-technical
+    -assistance-document-may2016.pdf
     
     Arguments:
          - pm25 (int or float): PM2.5 in ug/m3
@@ -147,22 +150,20 @@ def aqi(pm25):
         cat = colors[-1] 
         
     # EPA formula
-    aqi  = (cat["aqi_hi"]-cat["aqi_low"]) * (pm25-cat["pm_low"]) / (cat["pm_hi"]-cat["pm_low"]) + cat["aqi_low"]
+    aqi = (cat["aqi_hi"]-cat["aqi_low"]) * (pm25-cat["pm_low"]) / (cat["pm_hi"]-cat["pm_low"]) + cat["aqi_low"]
     
     return aqi
     
         
 
-################################################################################
-############################## Class Definitions ###############################
-################################################################################
-
+## Class Definitions
 
 class DataStream:
-    """
-    The DataStream class basically equates to a single CSV data file.
+    """ Class for single Purple Air dataset
     
-    Each purple air sensor should have four data streams (primary and secondary streams for two different channels)
+    The DataStream class basically equates to a single CSV data file.
+    Each purple air sensor should have four data streams: primary and
+    secondary streams for two different channels.
     
     The DataStream is set up by parsing the file name to determine the following attributes:
             - loc: "inside", "outside", or "undefined" (all channel B streams are undefined)
@@ -170,8 +171,6 @@ class DataStream:
             - channel: "A" or "B"
             - data_type: 1 (primary dataset) or 2 (secondary) or 0 (unknown)
             - lat/lon: sensor coordinates
-    
-    
     """
     
     def __init__(self,filepath):
@@ -187,14 +186,14 @@ class DataStream:
         
         STATION NAME channel (loc) (lat lon) DataType 60_minute_average startdate enddate.csv 
         
-        where startdate and enddate mark the time period for which the data was originally requested (so they should all be the same for this project)
+        where startdate and enddate mark the time period for which the 
+        data was originally requested (so they should all be the same for this project)
         """
         
         self.filepath = filepath #full file path
-        self.filename = filepath.split("./data/purple_air/")[1] # file name
+        self.filename = filepath.split("./data/purple_air/")[1]
         
-
-        #### Find the sensor"s location 
+        #### Find the sensor"s location
         loc_options = ["(inside)", "(outside)", "(undefined)"]
         
         #loop through the three location options
@@ -208,7 +207,6 @@ class DataStream:
                 name, data_info = self.filename.split(loc_option) #sensor name comes before location; data info comes after
                 self.sensor_name = name.strip() #station name is everything before the location
                 
-                
                 ### Get channel (A or B; only channel B files have the channel in the file name)
                 if self.sensor_name.endswith(" B"): 
                     self.channel = "B"
@@ -216,7 +214,6 @@ class DataStream:
                 else: 
                     self.channel = "A"
                     self.sensor_name = self.sensor_name.lower() #make lowercase
-                    
                     
                 ### Determine data type
                 if "Primary" in data_info:
@@ -226,7 +223,6 @@ class DataStream:
                 else:
                     self.data_type = 0 #unknown
                         
-                
                 ### Get lat/lon coordinates
                 latlon_pattern = r"\([0-9]+.[0-9]+ [-]+[0-9]+.[0-9]+\)" #regex search pattern for lat/lon coordinates separated by a space
                 search_result = re.search(latlon_pattern, data_info) #search the file name
@@ -237,14 +233,15 @@ class DataStream:
                     self.lat = float(lat_string)
                     self.lon = float(lon_string)
                 else: # did not find coordinates
-                    raise ValueError("Could not determine sensor coordinates from the file name.")
+                    raise ValueError("Could not determine sensor \
+                                      coordinates from the file name.")
                 
                 found_loc = True
-                
                 break
                 
         if not found_loc:
-            raise ValueError("Could not determine sensor location (inside/outside/undefined) from file name.")
+            raise ValueError("Could not determine sensor location \
+                            (inside/outside/undefined) from file name.")
                 
     def start_time(self):
         """Finds beginning of data record.
@@ -294,7 +291,6 @@ class DataStream:
             else:
                 pass
         
-        
         # make some friendlier names for the data fields
         rename = {"created_at":"time",
                   "Pressure_hpa": "pressure",
@@ -308,19 +304,6 @@ class DataStream:
                   "Temperature_F": "temp",
                   "Humidity_%": "rh"
                  }
-                  #">=0.3um/dl": "n_pm03",
-                  #">=0.5um/dl": "n_pm05",
-                  #">1.0um/dl": "n_pm1",
-                  #">=2.5um/dl": "n_pm25",
-                  #">=5.0um/dl": "n_pm5",
-                  #">=10.0um/dl": "n_pm10",
-                  
-        
-        # mark data fields from channel B
-        #if self.channel == "B":
-        #    for key in rename.keys():
-        #        if key != "created_at" and key != "Pressure_hpa": 
-        #            rename[key] = rename[key]+"b"
         
         #loop through and rename the variables
         for old_name, new_name in rename.items():
@@ -328,7 +311,6 @@ class DataStream:
                 ds = ds.rename({old_name: new_name})
             else:
                 pass
-        
         
         # assign units
         ug_m3 = ["pm1", "pm25", "pm10", "pm25_atm", "pm1_atm", "pm10_atm"]
@@ -364,16 +346,7 @@ class DataStream:
         ds.attrs["data_type"] = self.data_type
 
         return ds
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     
 class Sensor:
     """
@@ -559,23 +532,4 @@ class Sensor:
             ds[field].attrs = {"name": f"Concentration of particles smaller than {size} micron (Channel {channel})",
                                "units": "ug/m3"}
            
-        
-        #############
-        ###### Add in our number concentration data
-        
-        """     
-        num_fields = ["n_pm03","n_pm05","n_pm1","n_pm25","n_pm5","n_pm10"]
-        particle_sizes = ["0.3","0.5","1.0","2.5","5.0","10.0"]
-        
-        for field, size in zip(num_fields, particle_sizes): # loop through field names
-            
-            ds = ds.assign({field: a2[field],
-                            field+"b": b2[field]})
-            
-            ds[field].attrs = {"name": f"Number concentration of particles smaller than {size} micron (Channel A)",
-                               "units": "dl-1"} #attributes for Channel A
-            
-            ds[field+"b"].attrs = {"name": f"Number concentration of particles smaller than {size} micron (Channel A)",
-                               "units": "dl-1"} #attributes for Channel B
-        """
         return ds
