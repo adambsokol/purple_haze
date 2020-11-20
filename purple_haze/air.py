@@ -1,23 +1,15 @@
-'''
-air module of the purple_haze package.
+"""
+Air module of the purple_haze package.
 
 Contains class definitions for the Sensor and DataStream classes as well as some functions. 
-'''
-
-
+"""
 
 import re
 import xarray as xr
 import pandas as pd
 import numpy as np
 
-
-
-
-################################################################################
-################################## Functions ###################################
-################################################################################
-
+# Functions
 
 def files_to_dataframe(file_list):
     """Makes dataframe of Purple Air CSV files
@@ -51,12 +43,11 @@ def files_to_dataframe(file_list):
     return df
 
 
-
 def tract_files_to_sensors(tract_files):
     """Converts list of CSV file names to list of Sensor instances.
     
     Groups CSV files by sensor and initiates a Sensor class instance.
-    
+  
     Arguments:
         - tract_files (iterable of string): list of the paths of CSV 
         files for Purple Air data located within a specific census
@@ -66,7 +57,7 @@ def tract_files_to_sensors(tract_files):
         Purple Air sensor in the census tract. 
     """
     
-    #make DataStream instance from each CSV file
+    # make DataStream instance from each CSV file
     streams = [DataStream(file) for file in tract_files]
     
     # use sensor name and lat to identify different sensors
@@ -77,8 +68,8 @@ def tract_files_to_sensors(tract_files):
     for (name, lat) in sens_info: 
         
         # grabs list of DataStreams with matching info
-        sens_streams = [st for st in streams if st.sensor_name == name and st.lat == lat]
-        
+        sens_streams = [st for st in streams \
+                        if st.sensor_name == name and st.lat == lat]
         sens_stream_lists.append(sens_streams)
         
     # initiate Sensor instance for each group of matching DataStreams
