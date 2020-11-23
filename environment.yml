@@ -133,6 +133,7 @@ dependencies:
   - readline=7.0
   - requests=2.24.0
   - rtree=0.9.4
+  - scipy=1.5.2
   - send2trash=1.5.0
   - setuptools=50.3.1
   - shapely=1.6.4
