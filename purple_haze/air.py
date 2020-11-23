@@ -43,7 +43,55 @@ def files_to_dataframe(file_list):
     return df
 
 
+def get_tract_mean_aq(df_row):
+    """Gets mean outdoor AQI for a census tract
+    
+    
+    Calculates the average AQI for the census tract using all
+    available outdoor measurements. The mean AQI among different
+    sensors is first calculated for each hour of the record, and
+    the time-mean AQI is then found.
+    
+    Arguments:
+        - gdf_row: row of a pandas dataframe that has column
+                   labeled "data_stream_file_names"
+    Outputs:
+        - mean_aqi (float): time- and sensor-averaged outdoor AQI
+                            for the census tract. NaN is returned
+                            if the tract has no outdoor sensors. 
+        
+         
+    """
+    #if pd.isna(df_row['data_stream_file_names']):
+    if df_row['sensor_counts'] == 0:
+        return np.nan
+        
+    else:
+        all_sensors = tract_files_to_sensors(df_row['data_stream_file_names'].split(','))
+        outdoor_sensors = [sensor for sensor in all_sensors if sensor.loc=='outside']
+        
+        if len(outdoor_sensors) == 0:
+            return np.nan
+        
+        else:
+            sensor_dsets = [sensor.load() for sensor in outdoor_sensors]
 
+            #pad each dataset with NaNs to fill the study time period
+            times = np.arange(np.datetime64("2020-05-01T00:00:00"), 
+                              np.datetime64("2020-11-02T00:00:00"), 
+                              np.timedelta64(1, "h"))
+            sensor_dsets = [ds.interp(time=times) for ds in sensor_dsets]
+
+            # find hourly mean AQI by averaging together sensors
+            hourly_aqi = np.nanmean(np.stack([ds.aqi.values for ds in sensor_dsets]),
+                                    axis=0
+                                   )
+
+            # return time-average AQI
+            mean_aqi = np.nanmean(hourly_aqi)
+            return mean_aqi
+
+    
 def tract_files_to_sensors(tract_files):
     """Converts list of CSV file names to list of Sensor instances.
     
@@ -78,7 +126,6 @@ def tract_files_to_sensors(tract_files):
     sensors = [Sensor(sens_streams) for sens_streams in sens_stream_lists]
 
     return sensors
-
 
 def aqi(pm25):
     """AQI Calculator
@@ -522,6 +569,13 @@ class Sensor:
         ###### Calculate AQI
         vec_aqi = np.vectorize(aqi)
         ds["aqi"] = (("time"), vec_aqi(ds.pm25))
+        
+        # invalidate data if more than 10% of AQI measurements are zero
+        num_zero = (ds.aqi==0).sum("time").values
+        num_numeric = (~np.isnan(ds.aqi)).sum("time").values
+        if num_zero / num_numeric > 0.1:
+            ds["aqi"] = (("time"), np.full(ds.dims["time"], np.nan))
+        
         
         # add descriptive names and units
         fields = ["pm1","pm25","pm10","pm1b","pm25b","pm10b"]

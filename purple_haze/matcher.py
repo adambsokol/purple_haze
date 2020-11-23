@@ -24,6 +24,18 @@ def get_stream_names(data_array , name10):
         return data_array['all_names'][name10]
     except:
         return np.nan
+    
+def count_csv_files(files_string):
+    '''Helper function to count the number of data stream CSV files in a census tract
+    '''
+    
+    new_files_string = str(files_string)
+    counts = 0
+    if new_files_string == 'nan':
+        return 0
+    else:
+        counts = new_files_string.count(",") + 1
+        return counts
 
 
 def station_matcher(data_stream_df):
@@ -59,6 +71,9 @@ def station_matcher(data_stream_df):
     #It has the same data that is in aggregate, but we have to do it this funny way I think (?)
     #Basically it goes row by row and uses our helper function (get_sensor_names) to grab the sensor names from aggregate
     new_ses_data['data_stream_file_names'] = new_ses_data.apply(lambda row: get_stream_names(aggregate , row['NAME10']), axis=1)
+    
+    # This adds a column telling us how many purple air sensors there are within each census tract
+    new_ses_data['sensor_counts'] = new_ses_data.apply(lambda row: count_csv_files(row['data_stream_file_names']), axis=1) / 4
 
     return new_ses_data
     
