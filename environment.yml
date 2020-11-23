@@ -24,6 +24,7 @@ dependencies:
   - cycler=0.10.0=py38_0
   - decorator=4.4.2=py_0
   - defusedxml=0.6.0=py_0
+  - descartes=1.1.0=py_4
   - entrypoints=0.3=py38_0
   - expat=2.2.10=hb1e8313_2
   - fiona=1.8.4=py38h9a122fd_0
