@@ -43,55 +43,6 @@ def files_to_dataframe(file_list):
     return df
 
 
-def get_tract_mean_aq(df_row):
-    """Gets mean outdoor AQI for a census tract
-    
-    
-    Calculates the average AQI for the census tract using all
-    available outdoor measurements. The mean AQI among different
-    sensors is first calculated for each hour of the record, and
-    the time-mean AQI is then found.
-    
-    Arguments:
-        - gdf_row: row of a pandas dataframe that has column
-                   labeled "data_stream_file_names"
-    Outputs:
-        - mean_aqi (float): time- and sensor-averaged outdoor AQI
-                            for the census tract. NaN is returned
-                            if the tract has no outdoor sensors. 
-        
-         
-    """
-    #if pd.isna(df_row['data_stream_file_names']):
-    if df_row['sensor_counts'] == 0:
-        return np.nan
-        
-    else:
-        all_sensors = tract_files_to_sensors(df_row['data_stream_file_names'].split(','))
-        outdoor_sensors = [sensor for sensor in all_sensors if sensor.loc=='outside']
-        
-        if len(outdoor_sensors) == 0:
-            return np.nan
-        
-        else:
-            sensor_dsets = [sensor.load() for sensor in outdoor_sensors]
-
-            #pad each dataset with NaNs to fill the study time period
-            times = np.arange(np.datetime64("2020-05-01T00:00:00"), 
-                              np.datetime64("2020-11-02T00:00:00"), 
-                              np.timedelta64(1, "h"))
-            sensor_dsets = [ds.interp(time=times) for ds in sensor_dsets]
-
-            # find hourly mean AQI by averaging together sensors
-            hourly_aqi = np.nanmean(np.stack([ds.aqi.values for ds in sensor_dsets]),
-                                    axis=0
-                                   )
-
-            # return time-average AQI
-            mean_aqi = np.nanmean(hourly_aqi)
-            return mean_aqi
-
-    
 def tract_files_to_sensors(tract_files):
     """Converts list of CSV file names to list of Sensor instances.
     
@@ -126,6 +77,136 @@ def tract_files_to_sensors(tract_files):
     sensors = [Sensor(sens_streams) for sens_streams in sens_stream_lists]
 
     return sensors
+
+
+def get_tract_mean_aqi(df_row, include_smoke=True):
+    """Gets mean outdoor AQI for a census tract
+    
+    
+    Calculates the average AQI for the census tract using all
+    available outdoor measurements. The mean AQI among different
+    sensors is first calculated for each hour of the record, and
+    the time-mean AQI is then found.
+    
+    Arguments:
+        - df_row: row of a pandas dataframe that has column
+        labeled "data_stream_file_names"
+        - include_smoke (bool, default=True): if False, the smoky 
+        period between 2020-09-08T00:00 and 2020-09-19T23:00 is
+        excluded from calculation.
+    Outputs:
+        - mean_aqi (float): time- and sensor-averaged outdoor AQI
+        for the census tract. NaN is returned
+        if the tract has no outdoor sensors. 
+        
+         
+    """
+    #if pd.isna(df_row['data_stream_file_names']):
+    if df_row['sensor_counts'] == 0:
+        return np.nan
+        
+    else:
+        all_sensors = tract_files_to_sensors(df_row['data_stream_file_names'].split(','))
+        outdoor_sensors = [sensor for sensor in all_sensors if sensor.loc=='outside']
+        
+        if len(outdoor_sensors) == 0:
+            return np.nan
+        
+        else:
+            dsets = [sensor.load() for sensor in outdoor_sensors]
+
+            #pad each dataset with NaNs to fill the study time period
+            times = np.arange(np.datetime64("2020-05-01T00:00:00"), 
+                              np.datetime64("2020-11-02T00:00:00"), 
+                              np.timedelta64(1, "h"))
+            dsets = [ds.interp(time=times) for ds in dsets]
+            
+            # remove smoke period if desired
+            if not include_smoke:
+                start = np.datetime64("2020-09-08T00:00:00")
+                end = np.datetime64("2020-09-19T23:00:00")
+                dsets = [ds.where((ds.time < start) | (ds.time > end)) for ds in dsets]
+
+            # find hourly mean AQI by averaging together sensors
+            hourly_aqi = np.nanmean(np.stack([ds.aqi.values for ds in dsets]),
+                                    axis=0
+                                   )
+
+            # return time-average AQI
+            mean_aqi = np.nanmean(hourly_aqi)
+            return mean_aqi
+
+        
+def get_tract_exposure(df_row, aqi_threshold, include_smoke=True):
+    """Calculates exposure for sensitive groups
+    
+    Uses all outdoor sensors in a census tract to calculate the average
+    amount of time (in min/week) that tract AQI is above a provided
+    threshold. Exposures are first calculated for each individual sensor, then
+    averaged together.
+    
+    Arguments:
+        - df_row: row of a pandas dataframe that has column
+        labeled "data_stream_file_names"
+        - aqi_threshold: threshold above whch exposure will be calculated
+        - include_smoke (bool, default=True): if False, the smoky 
+        period between 2020-09-08T00:00 and 2020-09-19T23:00 is
+        excluded from calculation.
+    Outputs:
+        - tract_mean_exposure (float): tract-mean exposure to AQI above 100 
+        (in min/week)
+    """
+    #check that AQI threshold is positive integer
+    if type(aqi_threshold) is not int and type(aqi_threshold) is not float:
+        raise TypeError("AQI threshold must be numeric")
+    
+    if aqi_threshold <= 0:
+        raise ValueError("AQI threshold must be greater than zero.")
+        
+    
+    #if pd.isna(df_row['data_stream_file_names']):
+    if df_row['sensor_counts'] == 0:
+        return np.nan
+        
+    else:
+        all_sensors = tract_files_to_sensors(df_row['data_stream_file_names'].split(','))
+        outdoor_sensors = [sensor for sensor in all_sensors if sensor.loc=='outside']
+        
+        if len(outdoor_sensors) == 0:
+            return np.nan
+        
+        else:
+            dsets = [sensor.load() for sensor in outdoor_sensors]
+            
+            # remove smoke period if desired
+            if not include_smoke:
+                start = np.datetime64("2020-09-08T00:00:00")
+                end = np.datetime64("2020-09-19T23:00:00")
+                dsets = [ds.where((ds.time < start) | (ds.time > end)) for ds in dsets]
+                
+            exposures = [calculate_exposure(ds, aqi_threshold) for ds in dsets]
+            tract_mean_exposure = np.nanmean(np.array(exposures))
+            return tract_mean_exposure
+            
+    
+def calculate_exposure(sensor_data, aqi_threshold):
+    """Fraction of time that AQI exceeds threshold
+    
+    Arguments:
+        - sensor_data: xarray datasets for a Purple Air sensor, 
+        such as that produced by Sensor.load()
+        - aqi_threshold: threshold above which exposure will be 
+        calculated
+    Outputs:
+        - exposure_fraction: fraction of hourly measurements with AQI 
+        exceeding aqi_threshold
+    """
+    
+    num_measurements = (~np.isnan(sensor_data.aqi)).sum('time').values
+    num_exceed = (sensor_data.aqi >= aqi_threshold).sum('time').values
+    exposure_fraction = (60*num_exceed) / (num_measurements/24)
+    return exposure_fraction
+
 
 def aqi(pm25):
     """AQI Calculator
@@ -203,7 +284,8 @@ def aqi(pm25):
     
         
 
-## Class Definitions
+###################################################
+########## Class Definitions
 
 class DataStream:
     """ Class for single Purple Air dataset
