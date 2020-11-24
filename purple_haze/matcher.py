@@ -17,10 +17,16 @@ import numpy as np
 import pandas as pd
 
 def get_stream_names(data_array , name10):
-    """ Helper functions
+    """Retrieves data stream files for census tract
     
-    This is a helper function that grabs the data stream file names in each census tract from the joined dataframe to append to the SES data
-    If there are no data streams in a census tract it returns a nan.
+    Helper function that grabs the data stream file names in each
+    census tract from the joined dataframe to append to the SES data.
+    If there are no data streams in a census tract it returns NaN.
+    
+    Arguments:
+        - 
+    Returns:
+        -
     """
     try:
         return data_array['all_names'][name10]

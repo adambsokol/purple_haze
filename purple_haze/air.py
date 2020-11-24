@@ -22,7 +22,7 @@ def files_to_dataframe(file_list):
     Arguments:
         - file_list (iterable of strings): names of files to include in
         dataframe
-    Outputs:
+    Returns:
         - df (pandas DataFrame): contains one row for each CSV file in 
         file_list and columns indicating the file name, latitude, 
         longitude, sensor name, location, channel, and data type.
@@ -52,7 +52,7 @@ def tract_files_to_sensors(tract_files):
         - tract_files (iterable of string): list of the paths of CSV 
         files for Purple Air data located within a specific census
         tract. 
-    Outputs:
+    Returns:
         - sensors (list of Sensor instances): one Sensor for each 
         Purple Air sensor in the census tract. 
     """
@@ -94,7 +94,7 @@ def get_tract_mean_aqi(df_row, include_smoke=True):
         - include_smoke (bool, default=True): if False, the smoky 
         period between 2020-09-08T00:00 and 2020-09-19T23:00 is
         excluded from calculation.
-    Outputs:
+    Returns:
         - mean_aqi (float): time- and sensor-averaged outdoor AQI
         for the census tract. NaN is returned
         if the tract has no outdoor sensors. 
@@ -152,7 +152,7 @@ def get_tract_exposure(df_row, aqi_threshold, include_smoke=True):
         - include_smoke (bool, default=True): if False, the smoky 
         period between 2020-09-08T00:00 and 2020-09-19T23:00 is
         excluded from calculation.
-    Outputs:
+    Returns:
         - tract_mean_exposure (float): tract-mean exposure to AQI above 100 
         (in min/week)
     """
@@ -197,7 +197,7 @@ def calculate_exposure(sensor_data, aqi_threshold):
         such as that produced by Sensor.load()
         - aqi_threshold: threshold above which exposure will be 
         calculated
-    Outputs:
+    Returns:
         - exposure_fraction: fraction of hourly measurements with AQI 
         exceeding aqi_threshold
     """
@@ -402,7 +402,7 @@ class DataStream:
         Converts to an xarray dataset.
         Inputs:
             - None
-        Outputs:
+        Returns:
             - ds (xarray dataset)
         """
         
