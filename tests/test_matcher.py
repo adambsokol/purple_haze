@@ -12,7 +12,7 @@ class MatcherTest(unittest.TestCase):
     def test_smoke(self):
         '''first, a smoke test to make sure output of matcher.py is not zero'''
 	test = 'test'
-        assert matcher.files_string(test) is not None
+        assert matcher.count_csv_files(test) is not None
 
     # one-shot test (add next)
 
