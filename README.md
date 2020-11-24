@@ -41,6 +41,9 @@ purple_haze/
       |- air.py
       |- matcher.py
    |- setup.py
+   |- tests/
+      |-__init__.py
+      |- test_matcher.py
    |- LICENSE
    |- README.md
 ```
