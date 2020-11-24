@@ -12,7 +12,7 @@ matrix:
 # what branches should be evaluated
 branches:
     only:
-        - master
+        - main
 
 # commands to prepare the conda install - download the latest conda
 # and install it and add to path
