@@ -95,10 +95,14 @@ def get_stream_names(data_array, name10):
     If there are no data streams in a census tract it returns NaN.
     
     Args:
-        data_array
+        data_array (Pandas or GeoPandas dataframe): the combined array
+        containing identifiers of the census tract (NAME10) and a column of comma
+        separated values of each datastream in that census tract.
+        name10 (string): a unique string that identifies each census tract
 
     Returns:
-        - names 
+        names (string): the comma separated datastreams for the census tract
+        given in the Args. Returns nan if there are no datastreams.
     """
     try:
         names = data_array['all_names'][name10]
