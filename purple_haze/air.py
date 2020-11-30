@@ -1,8 +1,33 @@
-"""
-Air module of the purple_haze package.
+"""Air module of the purple_haze package.
 
-Contains class definitions for the Sensor and DataStream classes as
-well as some functions.
+Functions:
+
+files_to_dataframe(file_list): creates Dataframe of Purple Air CSV file
+info.
+
+tract_files_to_sensors(tract_files): converts CSV file names to Sensor
+class instances.
+
+get_tract_mean_aqi(df_row, include_smoke=True): calculates mean AQI
+for a census tract.
+
+get_tract_exposure(df_row, aqi_thresh, include_smoke=True): Calculates
+exposure to some AQI threshold for a census tract.
+
+aqi(pm25): calculates AQI based on PM2.5 data.
+
+
+Classes: 
+
+DataStream: represents a single Purple Air CSV data file. Four
+DataStreams are associated with a single Purple Air sensor.
+
+Sensor: represents a single Purple Air sensor, which is associated
+with four DataStreams.
+
+
+Purple Haze Project Group
+CSE 583 Fall 2020
 """
 
 import re
@@ -137,8 +162,8 @@ def get_tract_mean_aqi(df_row, include_smoke=True):
             return mean_aqi
 
         
-def get_tract_exposure(df_row, aqi_threshold, include_smoke=True):
-    """Calculates exposure for sensitive groups
+def get_tract_exposure(df_row, aqi_thresh, include_smoke=True):
+    """Calculates exposure to AQI threshold for a census tract
     
     Uses all outdoor sensors in a census tract to calculate the average
     amount of time (in min/week) that tract AQI is above a provided
@@ -157,14 +182,12 @@ def get_tract_exposure(df_row, aqi_threshold, include_smoke=True):
         (in min/week)
     """
     #check that AQI threshold is positive integer
-    if type(aqi_threshold) is not int and type(aqi_threshold) is not float:
+    if type(aqi_thresh) is not int and type(aqi_thresh) is not float:
         raise TypeError("AQI threshold must be numeric")
     
-    if aqi_threshold <= 0:
+    if aqi_thresh <= 0:
         raise ValueError("AQI threshold must be greater than zero.")
         
-    
-    #if pd.isna(df_row['data_stream_file_names']):
     if df_row['sensor_counts'] == 0:
         return np.nan
         
@@ -184,7 +207,7 @@ def get_tract_exposure(df_row, aqi_threshold, include_smoke=True):
                 end = np.datetime64("2020-09-19T23:00:00")
                 dsets = [ds.where((ds.time < start) | (ds.time > end)) for ds in dsets]
                 
-            exposures = [calculate_exposure(ds, aqi_threshold) for ds in dsets]
+            exposures = [calculate_exposure(ds, aqi_thresh) for ds in dsets]
             tract_mean_exposure = np.nanmean(np.array(exposures))
             return tract_mean_exposure
             
