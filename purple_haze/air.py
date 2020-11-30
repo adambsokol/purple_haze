@@ -609,10 +609,10 @@ class Sensor:
             stream in data_streams])
 
         lat0 = data_streams[0].lat
-        lat_check = all([stream.lat == lat for stream in data_streams])
+        lat_check = all([stream.lat == lat0 for stream in data_streams])
 
         lon0 = data_streams[0].lon
-        lon_check = all([stream.lon == lon for stream in data_streams])
+        lon_check = all([stream.lon == lon0 for stream in data_streams])
         
         # If DataStream info all matches -> assign to Sensor
         if name_check and lat_check and lon_check: 
@@ -659,9 +659,9 @@ class Sensor:
         # Validation of inputs is now complete.
 
         # Assign sensor parameters.
-        self.name = name
-        self.lat = lat
-        self.lon = lon
+        self.name = name0
+        self.lat = lat0
+        self.lon = lon0
         self.datastreams = data_streams
         self.num_streams = len(data_streams)
 
