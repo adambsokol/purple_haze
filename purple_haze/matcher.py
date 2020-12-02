@@ -97,7 +97,7 @@ def get_stream_names(data_array, name10):
     """
     try:
         names = data_array['all_names'][name10]
-    except NameError:
+    except (NameError, KeyError):
         names = np.nan
     return names
 
