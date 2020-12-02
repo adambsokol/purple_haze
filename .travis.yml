@@ -31,8 +31,9 @@ install:
     - conda install --yes coverage coveralls flake8
 
 # a list of commands to run before the main script
-#before_script:
-#    - flake8 codebase
+before_script:
+    - flake8 purple_haze/matcher.py
+    - flake8 purple_haze/air.py
 
 # the actual commands to run
 script:
