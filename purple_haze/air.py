@@ -125,16 +125,20 @@ def get_tract_mean_aqi(df_row, include_smoke=True):
         for the census tract. NaN is returned
         if the tract has no outdoor sensors.
     """
-    # If pd.isna(df_row['data_stream_file_names']):
-    if df_row['sensor_counts'] == 0:
+    # Check that input dataframe is already matched with Purple Air
+    if "data_stream_file_names" not in df_row:
+        raise ValueError("Input must have column 'data_stream_file_names'.")
+
+    # Returns NaN if no sensors in the census tract
+    if pd.isnull(df_row["data_stream_file_names"]):
         return np.nan
 
     else:
         all_sensors = tract_files_to_sensors(
-            df_row['data_stream_file_names'].split(','))
+            df_row["data_stream_file_names"].split(","))
 
         outdoor_sensors = [sensor for sensor in all_sensors
-                           if sensor.loc == 'outside']
+                           if sensor.loc == "outside"]
 
         if len(outdoor_sensors) == 0:
             return np.nan
@@ -184,22 +188,24 @@ def get_tract_exposure(df_row, aqi_thresh, include_smoke=True):
         (in min/week)
     """
 
-    # check that AQI threshold is positive integer
+    # Check that AQI threshold is numeric.
     if not isinstance(aqi_thresh, (int, float)):
         raise TypeError("AQI threshold must be numeric")
 
-    if aqi_thresh <= 0:
-        raise ValueError("AQI threshold must be greater than zero.")
+    # Check that input dataframe is already matched with Purple Air
+    if "data_stream_file_names" not in df_row:
+        raise ValueError("Input must have column 'data_stream_file_names'.")
 
-    if df_row['sensor_counts'] == 0:
+    # Returns NaN if no sensors in the census tract
+    if pd.isnull(df_row["data_stream_file_names"]):
         return np.nan
 
     else:
         all_sensors = tract_files_to_sensors(
-            df_row['data_stream_file_names'].split(','))
+            df_row["data_stream_file_names"].split(","))
 
         outdoor_sensors = [sensor for sensor in all_sensors
-                           if sensor.loc == 'outside']
+                           if sensor.loc == "outside"]
 
         if len(outdoor_sensors) == 0:
             return np.nan
@@ -233,8 +239,12 @@ def calculate_exposure(sensor_data, aqi_threshold):
         exceeding aqi_threshold
     """
 
+    # Number of non-NaN measurements in the record.
     num_measurements = (~np.isnan(sensor_data.aqi)).sum('time').values
+
+    # Number of measurements exceeding the threshold
     num_exceed = (sensor_data.aqi >= aqi_threshold).sum('time').values
+
     exposure_fraction = (60*num_exceed) / (num_measurements/24)
     return exposure_fraction
 
@@ -370,70 +380,90 @@ class DataStream:
             Purple Air
         """
 
-        # File info.
-        self.filepath = filepath
+        # Check that input is a string.
+        if type(filepath) != str:
+            raise TypeError("Input must be string.")
+
+        # Check that input file has .csv extension (like all PurpAir files).
+        if not filepath.endswith(".csv"):
+            raise ValueError("Input file must have .csv extension.")
+
+        # Assign file info attributes.
+        self.filepath = filepath 
         self.filename = filepath.split("./data/purple_air/")[1]
 
-        # Find location.
+        # Get lat/lon coordinates from the file name.
+        latlon_regex_pattern = r"\([0-9]+.[0-9]+ [-]+[0-9]+.[0-9]+\)"
+        search_result = re.search(latlon_regex_pattern, self.filename)
+    
+        if search_result:
+            # Coordinates were found.
+            crd_str = search_result.group()
+            lat_str, lon_str = crd_str[1:-1].split() # Removes parens.
+            self.lat = float(lat_str)
+            self.lon = float(lon_str)
+
+        else:
+            # Cannot create DataStream without coordinates
+            raise ValueError("Cannot determine lat/lon coordinates.")
+
+        # Split file name into two parts (before & after coords)
+        fname_parts = self.filename.split(crd_str)
+        name_loc = fname_parts[0] # Part 1: sensor name & location
+        type_info = fname_parts[1] # Part 2: dataset type & other info
+
+        # Determine sensor location and name.
         loc_options = ["(inside)", "(outside)", "(undefined)"]
         found_loc = False
 
         for loc_option in loc_options:
 
-            if loc_option in self.filename.lower():
+            if loc_option in name_loc.lower():
 
-                # Found location.
-                self.loc = loc_option[1:-1]  # Removes paretheses.
+                # Found location. 
+                self.loc = loc_option[1:-1] # Removes parentheses.
 
-                # Retrieve sensor name and other parameters
-                name, data_info = self.filename.split(loc_option)
-                self.sensor_name = name.strip()
-
-                # Determine channel (channel B has "B" in sensor name)
-                if self.sensor_name.endswith(" B"):
-                    self.channel = "B"
-
-                    # Remove channel label from the sensor name.
-                    self.sensor_name = self.sensor_name[:-1].strip().lower()
-
-                else:
-                    self.channel = "A"
-                    self.sensor_name = self.sensor_name.lower()
-
-                # Determine data_type.
-                if "Primary" in data_info:
-                    self.data_type = 1
-
-                elif "Secondary" in data_info:
-                    self.data_type = 2
-
-                else:
-                    # Unknown.
-                    self.data_type = 0
-
-                # Determine lat/lon coordinates.
-                latlon_regex_pattern = r"\([0-9]+.[0-9]+ [-]+[0-9]+.[0-9]+\)"
-                search_result = re.search(latlon_regex_pattern, data_info)
-
-                if search_result:
-                    # Coordinates were found.
-                    crd_string = search_result.group()[1:-1]  # Removes parens.
-                    lat_string, lon_string = crd_string.split()
-                    self.lat = float(lat_string)
-                    self.lon = float(lon_string)
-
-                else:
-                    # No coordinates found.
-                    raise ValueError("Could not determine sensor \
-                                      coordinates from the file name.")
+                # Sensor name is everything before the location string.
+                sensor_name = name_loc.split(loc_option)[0].strip()
 
                 found_loc = True
 
-                break
-
+        # Location not found -> attempt to determine sensor name.
         if not found_loc:
-            raise ValueError("Could not determine sensor location \
-                            (inside/outside/undefined) from file name.")
+
+            self.loc = "undefined"
+
+            if "(" in name_loc:
+                # Sensor name is everything before parentheses.
+                sensor_name = name_loc.split("(")[0].strip()
+
+            else:
+                # Sensor name is everything prior to lat/lon coords.
+                sensor_name = name_loc.strip()
+
+        # Determine channel (if channel B, sensor name ends with "B")
+        if sensor_name.endswith("B"):
+            self.channel = "B"
+
+            # Remove "B" label from sensor name
+            sensor_name = sensor_name[:-1].strip()
+
+        else:
+            self.channel = "A"
+            sensor_name = sensor_name
+
+        # Assign sensor name now that it is fully processed
+        self.sensor_name = sensor_name.lower()
+
+        # Determine data type (primary or secondary)
+        if "Primary" in type_info:
+            self.data_type = 1
+
+        elif "Secondary" in type_info:
+            self.data_type = 2
+
+        else:
+            self.data_type = 0
 
     def start_time(self):
         """Finds beginning of the DataStream's record.
