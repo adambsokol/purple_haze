@@ -23,6 +23,6 @@ dependencies:
   - python-dateutil=2.8.1
   - scipy=1.5.2
   - shapely=1.6.4
-  - voila=0.1.19
+  - voila=0.2.4
   - xarray=0.16.1
 prefix: /Users/adamsokol/anaconda3/envs/purple_haze
