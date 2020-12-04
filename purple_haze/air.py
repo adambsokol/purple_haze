@@ -389,17 +389,17 @@ class DataStream:
             raise ValueError("Input file must have .csv extension.")
 
         # Assign file info attributes.
-        self.filepath = filepath 
+        self.filepath = filepath
         self.filename = filepath.split("./data/purple_air/")[1]
 
         # Get lat/lon coordinates from the file name.
         latlon_regex_pattern = r"\([0-9]+.[0-9]+ [-]+[0-9]+.[0-9]+\)"
         search_result = re.search(latlon_regex_pattern, self.filename)
-    
+
         if search_result:
             # Coordinates were found.
             crd_str = search_result.group()
-            lat_str, lon_str = crd_str[1:-1].split() # Removes parens.
+            lat_str, lon_str = crd_str[1:-1].split()  # Removes parens.
             self.lat = float(lat_str)
             self.lon = float(lon_str)
 
@@ -409,8 +409,8 @@ class DataStream:
 
         # Split file name into two parts (before & after coords)
         fname_parts = self.filename.split(crd_str)
-        name_loc = fname_parts[0] # Part 1: sensor name & location
-        type_info = fname_parts[1] # Part 2: dataset type & other info
+        name_loc = fname_parts[0]  # Part 1: sensor name & location
+        type_info = fname_parts[1]  # Part 2: dataset type & other info
 
         # Determine sensor location and name.
         loc_options = ["(inside)", "(outside)", "(undefined)"]
@@ -420,8 +420,8 @@ class DataStream:
 
             if loc_option in name_loc.lower():
 
-                # Found location. 
-                self.loc = loc_option[1:-1] # Removes parentheses.
+                # Found location.
+                self.loc = loc_option[1:-1]  # Removes parentheses.
 
                 # Sensor name is everything before the location string.
                 sensor_name = name_loc.split(loc_option)[0].strip()
