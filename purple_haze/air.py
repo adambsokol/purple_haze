@@ -16,6 +16,7 @@ exposure to some AQI threshold for a census tract.
 
 aqi(pm25): calculates AQI from PM2.5 measurements using EPA formula.
 
+remove_utc(time_string): removes time zone tag from a timestamp stiring.
 
 Classes:
 
