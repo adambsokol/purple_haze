@@ -168,13 +168,14 @@ def get_tract_mean_aqi(df_row, include_smoke=True):
             return mean_aqi
 
 
-def get_tract_exposure(df_row, aqi_thresh, include_smoke=True):
+def get_tract_exposure(df_row, aqi_threshold, include_smoke=True):
     """Calculates exposure to AQI threshold for a census tract
 
     Uses all outdoor sensors in a census tract to calculate the average
     amount of time (in min/week) that tract AQI is above a provided
-    threshold. Exposures are first calculated for each individual sensor, then
-    averaged together.
+    threshold. The exposure is calculated by dividing the number of
+    measurements in the tract exceeding the threshold (across all sensors) by
+    the total number of measurements in the tract (across all sensors).
 
     Args:
         - df_row: row of a pandas dataframe that has column
@@ -184,12 +185,12 @@ def get_tract_exposure(df_row, aqi_thresh, include_smoke=True):
         period between 2020-09-08T00:00 and 2020-09-19T23:00 is
         excluded from calculation.
     Returns:
-        - tract_mean_exposure (float): tract-mean exposure to AQI above 100
-        (in min/week)
+        - exposure (float): tract-mean exposure to AQI above 100
+        (in minutes/day)
     """
 
     # Check that AQI threshold is numeric.
-    if not isinstance(aqi_thresh, (int, float)):
+    if not isinstance(aqi_threshold, (int, float)):
         raise TypeError("AQI threshold must be numeric")
 
     # Check that input dataframe is already matched with Purple Air
@@ -220,33 +221,21 @@ def get_tract_exposure(df_row, aqi_thresh, include_smoke=True):
                 dsets = [ds.where((ds.time < start) | (ds.time > end))
                          for ds in dsets]
 
-            exposures = [calculate_exposure(ds, aqi_thresh) for ds in dsets]
-            tract_mean_exposure = np.nanmean(np.array(exposures))
+            # Calculate number of measurements in the tract in units of total
+            # measurement hours.
+            num_meas = [ds.aqi.notnull().sum().values for ds in dsets]
+            measurement_days = np.nansum(np.array(num_meas)) / 24
 
-            return tract_mean_exposure
+            # Calculate the amount of time that AQI exceeded threshold, in
+            # units of total measurement minutes.
+            num_exceed = [(ds.aqi >= aqi_threshold).sum().values
+                          for ds in dsets]
+            exceed_minutes = np.nansum(np.array(num_exceed)) * 60
 
+            # Threshold exceedance rate in minutes per day.
+            exposure = exceed_minutes / measurement_days
 
-def calculate_exposure(sensor_data, aqi_threshold):
-    """Fraction of time that AQI exceeds threshold
-
-    Args:
-        - sensor_data: xarray datasets for a Purple Air sensor,
-        such as that produced by Sensor.load()
-        - aqi_threshold: threshold above which exposure will be
-        calculated
-    Returns:
-        - exposure_fraction: fraction of hourly measurements with AQI
-        exceeding aqi_threshold
-    """
-
-    # Number of non-NaN measurements in the record.
-    num_measurements = (~np.isnan(sensor_data.aqi)).sum('time').values
-
-    # Number of measurements exceeding the threshold
-    num_exceed = (sensor_data.aqi >= aqi_threshold).sum('time').values
-
-    exposure_fraction = (60*num_exceed) / (num_measurements/24)
-    return exposure_fraction
+            return exposure
 
 
 def aqi(pm25):
@@ -478,14 +467,12 @@ class DataStream:
             the DataStream.
         """
 
-        # grabs the minimum time of the time field from the CSV
+        # Grabs the earliest time recorded in the CSV file.
         start_time = pd.read_csv(self.filepath).created_at.min()
 
-        # remove time zone if it"s there
+        # Remove time zone before converting to datetime64.
         if start_time.endswith("UTC"):
             start_time = start_time[:-3].strip()
-        else:
-            pass
 
         return np.datetime64(start_time)
 
@@ -604,9 +591,6 @@ class Sensor:
         - datastreams (list of DataStream instances): DataStreams
         associated with the sensor
 
-        - num_streams (int): number of DataStreams associated with the
-        sensor.
-
         - A1 (DataStream instance): parimary channel A DataStream.
 
         - A2 (DataStream instance): secondary channel A DataStream.
@@ -621,32 +605,14 @@ class Sensor:
 
         Args:
             - data_streams (list of DataStream instances): list of the
-            four DataStreams associated with the sensor.
+            four DataStreams associated with the sensor (channels A & B,
+            primary and secondary). The DataStreams must have identical
+            sensor_name, lat, and lon attributes.
         """
 
         # Check for exactly four DataStreams.
         if len(data_streams) != 4:
             raise ValueError("Input list must contain four DataStreams")
-        else:
-            pass
-
-        # DataStreams must have same sensor_name and coordinates.
-        name0 = data_streams[0].sensor_name
-        name_check = all([stream.sensor_name == name0 for
-                          stream in data_streams])
-
-        lat0 = data_streams[0].lat
-        lat_check = all([stream.lat == lat0 for stream in data_streams])
-
-        lon0 = data_streams[0].lon
-        lon_check = all([stream.lon == lon0 for stream in data_streams])
-
-        # If DataStream info all matches -> assign to Sensor
-        if name_check and lat_check and lon_check:
-            pass
-        else:
-            # DataStreams do not all belong to the same sensor.
-            raise ValueError("DataStreams must have identical sensor names")
 
         # Check for valid DataStream channels
         chans = [stream.channel for stream in data_streams]
@@ -672,33 +638,41 @@ class Sensor:
         if len(stream_info_tuples) != len(set(stream_info_tuples)):
             raise ValueError("DataStreams must all have unique combination \
                 of channel and data type.")
-        else:
-            pass
+
+        # Check that all sensor_names and lat/lon coordinates match.
+        name0 = data_streams[0].sensor_name
+        name_check = all([stream.sensor_name == name0 for
+                          stream in data_streams])
+
+        lat0 = data_streams[0].lat
+        lat_check = all([stream.lat == lat0 for stream in data_streams])
+
+        lon0 = data_streams[0].lon
+        lon_check = all([stream.lon == lon0 for stream in data_streams])
+
+        if not name_check or not lat_check or not lon_check:
+            raise ValueError("DataStreams must have matching sensor names \
+                and lat/lon coordinates.")
 
         # Check that DataStream locs do not conflict.
-        locs = set([stream.loc for stream in data_streams])
+        locs = [stream.loc for stream in data_streams]
 
         if "inside" in locs and "outside" in locs:
             raise ValueError("DataStreams have conflicting locations.")
-        else:
-            pass
 
         # Validation of inputs is now complete.
 
-        # Assign sensor parameters.
+        # Assign some sensor attributes.
         self.name = name0
         self.lat = lat0
         self.lon = lon0
         self.datastreams = data_streams
-        self.num_streams = len(data_streams)
 
-        # Get sensor location.
+        # Determine sensor location.
         if "inside" in locs:
             self.loc = "inside"
-
         elif "outside" in locs:
             self.loc = "outside"
-
         else:
             self.loc = "undefined"
 
@@ -713,23 +687,24 @@ class Sensor:
             elif stream.channel == "B" and stream.data_type == 2:
                 self.str_b2 = stream
             else:
+                # Should not end up here if previous input checks all passed.
                 pass
 
     def start_time(self):
-        """ Finds beginning of data record.
+        """ Finds beginning of Sensor's data record.
 
         Similar to DataStream.start_time() but for the Sensor class. If
         the Sensor's DataStreams have different start times, the
         earliest is returned.
 
         Returns:
-            start_time (numpy datetime64): beginning of data reord.
+            numpy datetime64: beginning of data reord.
         """
 
-        # Get start time for each DataStream
+        # Start times for each of the four DataStreams
         start_times = pd.Series([s.start_time() for s in self.datastreams])
-        start_time = start_times.min()
-        return start_time
+
+        return start_times.min()
 
     def load(self):
         """Loads and combines data from the sensor's DataStreams.
