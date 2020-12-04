@@ -14,7 +14,7 @@ for a census tract.
 get_tract_exposure(df_row, aqi_thresh, include_smoke=True): Calculates
 exposure to some AQI threshold for a census tract.
 
-aqi(pm25): calculates AQI based on PM2.5 data.
+aqi(pm25): calculates AQI from PM2.5 measurements using EPA formula.
 
 
 Classes:
@@ -321,6 +321,26 @@ def aqi(pm25):
     return aqi_num
 
 
+def remove_utc(time_string):
+    """ Removes UTC from end of time string.
+
+    The purpose is to clean up time strings so they can be converted to
+    Numpy datetime64 objects, since datetime64 cannot be initialized if
+    if the input string includes the UTC marker.
+
+    Args:
+        - time_string (string): timestamp string from Purple Air
+        dataset.
+    Returns:
+        - (string): the cleaned-up timestamp string (without "UTC")
+    """
+
+    if time_string.endswith("UTC"):
+        return time_string[:-3].strip()
+    else:
+        return time_string
+
+
 # Class Definitions
 
 class DataStream:
@@ -546,14 +566,9 @@ class DataStream:
             else:
                 pass
 
-        # Convert time to numpy datetime64
-        time = []
-        for times in dset.time.values:
-            if times.endswith("UTC"):
-                time.append(np.datetime64(times[:-3].strip()))
-            else:
-                time.append(np.datetime64(times))
-        dset["time"] = (("time"), np.array(time))
+        tstrings = [remove_utc(ts) for ts in dset["time"].values]
+
+        dset["time"] = (("time"), [np.datetime64(ts) for ts in tstrings])
 
         # Add some attributes with the DataStream info
         dset.attrs["sensor_name"] = self.sensor_name
