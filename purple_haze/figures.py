@@ -154,7 +154,8 @@ def make_widgets(renamed_ses_data):
     """
 
     # metric lists
-    ses_metric_list = match.ses_name_mappings.values()
+    all_ses_metrics = match.ses_name_mappings.values()
+    ses_metric_list = [metric for metric in all_ses_metrics if 'quintile' not in metric]
 
     aqi_metric_list = [
         'mean_aqi',
