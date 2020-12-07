@@ -26,7 +26,8 @@ import numpy as np
 import pandas as pd
 
 
-def station_matcher(data_stream_df):
+def station_matcher(data_stream_df, 
+    ses_directory="../data/seattle_ses_data/ses_data.shp"):
     """ Matches Purple Air data with census tracts
 
     This function reads in the census-tract-level socioenconomic
