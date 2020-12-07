@@ -21,8 +21,8 @@ import warnings
 import geopandas as gpd
 from geopandas.tools import sjoin
 
-import matcher
-import air
+from purple_haze import matcher
+from purple_haze import air
 
 class AirTests(unittest.TestCase):
     def test_smoke_files_to_dataframe(self):
