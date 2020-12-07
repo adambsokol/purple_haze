@@ -77,7 +77,7 @@ def station_matcher(data_stream_df):
     new_ses_data['sensor_counts'] = new_ses_data['datastream_counts'] / 4
     for count in new_ses_data['sensor_counts']:
         if count.is_integer() is False:
-            raise ValueError('A sensor in Census Tract %s has fewer than four inputs.'
+            raise ValueError('A sensor in Tract %s has fewer than four inputs.'
                              % new_ses_data['NAME10'])
     return new_ses_data
 
