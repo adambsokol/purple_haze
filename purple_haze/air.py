@@ -400,7 +400,7 @@ class DataStream:
 
         # Assign file info attributes.
         self.filepath = filepath
-        self.filename = filepath.split("./data/purple_air/")[1]
+        self.filename = filepath.split("data/purple_air/")[1]
 
         # Get lat/lon coordinates from the file name.
         latlon_regex_pattern = r"\([0-9]+.[0-9]+ [-]+[0-9]+.[0-9]+\)"
