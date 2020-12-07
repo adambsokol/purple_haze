@@ -201,7 +201,7 @@ class MatcherTests(unittest.TestCase):
         Function: get_stream_names
         
         Some Purple Air data points are located outside Seattle. One example is:
-        High Woodlands (outside) (47.735602 -122.182855) Primary 60_minute_average 05_01_2020 11_01_2020
+        High Woodlands (47.735602 -122.182855) 
         
         This test checks to see that that location does not appear in the output of matcher.get_stream_names
                 
@@ -258,7 +258,7 @@ class MatcherTests(unittest.TestCase):
         sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
         assert len(matcher.station_matcher(sensor_data)) > 0
 
-    def test_oneshot_station_matcher(self):
+    def test_oneshot_station_matcher_0(self):
         '''
         One-shot test for matcher module
         Function: station_matcher
@@ -278,8 +278,67 @@ class MatcherTests(unittest.TestCase):
         non_zero = m[m['sensor_counts']>0]
 #         print(non_zero['NAME10'].iloc[0])
         assert non_zero['NAME10'].iloc[0] == '46'
-
     
+    def test_oneshot_station_matcher_1(self):
+        '''
+        One-shot test for matcher module
+        Function: station_matcher
+        
+        We're testing one sensor to make sure it matches up with the correct census tract:
+        Green Lake SE should be in Census Tract 46:
+                
+        Returns:
+            bool:
+                True if successful, False otherwise.
+            
+        Test passes if True
+        '''
+        test_sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/CBF*'))
+        
+        m = matcher.station_matcher(test_sensor_data)
+        non_zero = m[m['sensor_counts']>0]
+#         print(non_zero['NAME10'].iloc[0])
+        assert non_zero['NAME10'].iloc[0] == '1'
+    
+    def test_oneshot_station_matcher_1(self):
+        '''
+        One-shot test for matcher module
+        Function: station_matcher
+        
+        We're testing one sensor to make sure it matches up with the correct census tract:
+        Green Lake SE should be in Census Tract 01:
+                
+        Returns:
+            bool:
+                True if successful, False otherwise.
+            
+        Test passes if True
+        '''
+        test_sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/CBF*'))
+        
+        m = matcher.station_matcher(test_sensor_data)
+        our_station = m[m['data_stream_file_names']=='../data/purple_air/CBF*']
+        print(our_station)
+        assert len(our_station) == 0
+
+    def test_edge_station_matcher(self):
+        '''
+        Edge test for matcher module
+        Function: station_matcher
+        
+        Making a copy of Nickerson Marina csv, but renaming it to have lat-long in the water
+                
+        Returns:
+            bool:
+                True if successful, False otherwise.
+            
+        Test passes if True
+        '''
+        
+        test_sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/Nickerson Marina - Houseboat Dock (outside) *'))
+        with self.assertRaises(ValueError):
+            error = matcher.station_matcher(test_sensor_data)
+            print(error)    
 
 if __name__ == '__main__':
     unittest.main()

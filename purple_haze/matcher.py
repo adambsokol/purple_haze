@@ -75,6 +75,11 @@ def station_matcher(data_stream_df):
         axis=1)
     # number of Sensors in each tract (number of CSV files divided by 4)
     new_ses_data['sensor_counts'] = new_ses_data['datastream_counts'] / 4
+    for count in new_ses_data['sensor_counts']:
+        if count.is_integer() is False:
+            raise ValueError("A sensor in Census Tract %s does not have all four inputs." % new_ses_data['NAME10'])
+    else:
+        pass
     return new_ses_data
 
 
