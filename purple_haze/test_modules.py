@@ -36,7 +36,7 @@ class AirTests(unittest.TestCase):
             
         Test passes if True
         '''
-        sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
+        sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
         assert len(sensor_data) > 0
 
     def test_smoke_tract_files_to_sensors(self):
@@ -50,8 +50,8 @@ class AirTests(unittest.TestCase):
             
         Test passes if True
         '''
-        sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
-        matched_ses_data = matcher.station_matcher(sensor_data)
+        sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
+        matched_ses_data = matcher.station_matcher(sensor_data, ses_directory = 'data/seattle_ses_data/ses_data.shp')
         
         sensors = matched_ses_data.apply(lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
         
@@ -68,8 +68,8 @@ class AirTests(unittest.TestCase):
             
         Test passes if True
         '''
-        sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
-        matched_ses_data = matcher.station_matcher(sensor_data)
+        sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
+        matched_ses_data = matcher.station_matcher(sensor_data, ses_directory = 'data/seattle_ses_data/ses_data.shp')
         
         matched_ses_data['mean_aqi'] = matched_ses_data.apply(lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
         assert len(matched_ses_data['mean_aqi']) > 0
@@ -85,8 +85,8 @@ class AirTests(unittest.TestCase):
             
         Test passes if True
         '''
-        sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
-        matched_ses_data = matcher.station_matcher(sensor_data)
+        sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
+        matched_ses_data = matcher.station_matcher(sensor_data, ses_directory = 'data/seattle_ses_data/ses_data.shp')
         
         matched_ses_data['exp100'] = matched_ses_data.apply(lambda row: air.get_tract_exposure(row, 100), axis=1)
         assert len(matched_ses_data['exp100']) > 0
@@ -160,12 +160,12 @@ class MatcherTests(unittest.TestCase):
             
         Test passes if True
         '''
-        ses_file = '../data/seattle_ses_data/ses_data.shp'
+        ses_file = 'data/seattle_ses_data/ses_data.shp'
         ses_data = gpd.read_file(ses_file)
         new_ses_data = ses_data.to_crs(epsg=4326)
         
         # convert input to GeoDataFrame using lat/lon
-        data_stream_df = air.files_to_dataframe(glob.glob('../data/purple_air/Green Lake SE*'))
+        data_stream_df = air.files_to_dataframe(glob.glob('data/purple_air/Green Lake SE*'))
         data_stream_gdf = gpd.GeoDataFrame(
             data_stream_df,
             geometry=gpd.points_from_xy(
@@ -190,10 +190,8 @@ class MatcherTests(unittest.TestCase):
         new_ses_data['data_stream_file_names'] = new_ses_data.apply(
             lambda row: matcher.get_stream_names(aggregate, row['NAME10']), axis=1)
         
-        
-        
         our_names = new_ses_data['data_stream_file_names'].dropna()
-        assert our_names.iloc[0].startswith('../data/purple_air/Green Lake SE')
+        assert our_names.iloc[0].startswith('data/purple_air/Green Lake SE')
 
     def test_edge_get_stream_names(self):
         '''
@@ -211,12 +209,12 @@ class MatcherTests(unittest.TestCase):
             
         Test passes if True
         '''
-        ses_file = '../data/seattle_ses_data/ses_data.shp'
+        ses_file = 'data/seattle_ses_data/ses_data.shp'
         ses_data = gpd.read_file(ses_file)
         new_ses_data = ses_data.to_crs(epsg=4326)
         
         # convert input to GeoDataFrame using lat/lon
-        data_stream_df = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
+        data_stream_df = air.files_to_dataframe(glob.glob('data/purple_air/*'))
         data_stream_gdf = gpd.GeoDataFrame(
             data_stream_df,
             geometry=gpd.points_from_xy(
@@ -255,8 +253,8 @@ class MatcherTests(unittest.TestCase):
             
         Test passes if True
         '''
-        sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
-        assert len(matcher.station_matcher(sensor_data)) > 0
+        sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
+        assert len(matcher.station_matcher(sensor_data, ses_directory = 'data/seattle_ses_data/ses_data.shp')) > 0
 
     def test_oneshot_station_matcher_0(self):
         '''
@@ -272,9 +270,9 @@ class MatcherTests(unittest.TestCase):
             
         Test passes if True
         '''
-        test_sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/Green Lake SE*'))
+        test_sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/Green Lake SE*'))
         
-        m = matcher.station_matcher(test_sensor_data)
+        m = matcher.station_matcher(test_sensor_data, ses_directory = 'data/seattle_ses_data/ses_data.shp')
         non_zero = m[m['sensor_counts']>0]
 #         print(non_zero['NAME10'].iloc[0])
         assert non_zero['NAME10'].iloc[0] == '46'
@@ -293,9 +291,9 @@ class MatcherTests(unittest.TestCase):
             
         Test passes if True
         '''
-        test_sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/CBF*'))
+        test_sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/CBF*'))
         
-        m = matcher.station_matcher(test_sensor_data)
+        m = matcher.station_matcher(test_sensor_data, ses_directory = 'data/seattle_ses_data/ses_data.shp')
         non_zero = m[m['sensor_counts']>0]
 #         print(non_zero['NAME10'].iloc[0])
         assert non_zero['NAME10'].iloc[0] == '1'
@@ -314,10 +312,10 @@ class MatcherTests(unittest.TestCase):
             
         Test passes if True
         '''
-        test_sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/CBF*'))
+        test_sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/CBF*'))
         
-        m = matcher.station_matcher(test_sensor_data)
-        our_station = m[m['data_stream_file_names']=='../data/purple_air/CBF*']
+        m = matcher.station_matcher(test_sensor_data, ses_directory = 'data/seattle_ses_data/ses_data.shp')
+        our_station = m[m['data_stream_file_names']=='data/purple_air/CBF*']
         print(our_station)
         assert len(our_station) == 0
 
@@ -335,9 +333,9 @@ class MatcherTests(unittest.TestCase):
         Test passes if True
         '''
         
-        test_sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/Nickerson Marina - Houseboat Dock (outside) *'))
+        test_sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/Nickerson Marina - Houseboat Dock (outside) *'))
         with self.assertRaises(ValueError):
-            error = matcher.station_matcher(test_sensor_data)
+            error = matcher.station_matcher(test_sensor_data, ses_directory = 'data/seattle_ses_data/ses_data.shp')
             print(error)    
 
 if __name__ == '__main__':
