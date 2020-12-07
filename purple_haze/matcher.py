@@ -48,7 +48,7 @@ def station_matcher(
     provided as a single string, with paths separated by commas.
     """
     # Load socioeconomic dataset.
-    ses_file = "../data/seattle_ses_data/ses_data.shp"
+    ses_file = ses_directory
     ses_data = gpd.read_file(ses_file)
     new_ses_data = ses_data.to_crs(epsg=4326)
 
