@@ -12,7 +12,7 @@ count_csv_files(files_string): determines the number of of DataStream
 CSV files within each census tract.
 
 Purple Haze Project Groups
-CSE 583 Fall 2020
+CSE 583 Fall 2020s
 
 import air as air
 import matcher as match
@@ -26,8 +26,9 @@ import numpy as np
 import pandas as pd
 
 
-def station_matcher(data_stream_df, 
-    ses_directory="../data/seattle_ses_data/ses_data.shp"):
+def station_matcher(
+        data_stream_df,
+        ses_directory="../data/seattle_ses_data/ses_data.shp"):
     """ Matches Purple Air data with census tracts
 
     This function reads in the census-tract-level socioenconomic
@@ -46,40 +47,50 @@ def station_matcher(data_stream_df,
     DataStreams contained within each tract. The CSV file paths are
     provided as a single string, with paths separated by commas.
     """
-    # load socioeconomic dataset
-    ses_file = '../data/seattle_ses_data/ses_data.shp'
+    # Load socioeconomic dataset.
+    ses_file = "../data/seattle_ses_data/ses_data.shp"
     ses_data = gpd.read_file(ses_file)
     new_ses_data = ses_data.to_crs(epsg=4326)
-    # convert input to GeoDataFrame using lat/lon
+
+    # Convert input to GeoDataFrame using lat/lon.
     data_stream_gdf = gpd.GeoDataFrame(
         data_stream_df,
         geometry=gpd.points_from_xy(
-            data_stream_df['lon'],
-            data_stream_df['lat']),
+            data_stream_df["lon"],
+            data_stream_df["lat"]),
         crs="EPSG:4326")
-    # join the two dataframes (must use "inner" to rerain sensor file names)
+
+    # Join the two dataframes (must use "inner" to rerain sensor file names).
     combined = sjoin(new_ses_data,
                      data_stream_gdf,
-                     how='inner',
-                     op='intersects')
-    # combine rows from same tract ('NAME10' is census tract name)
-    grouped = combined.groupby('NAME10')
-    # make new column containing CSV file names separated by commas
+                     how="inner",
+                     op="intersects")
+    # Combine rows from same tract ('NAME10' is census tract name).
+    grouped = combined.groupby("NAME10")
+
+    # Make new column containing CSV file names separated by commas.
     aggregate = grouped.agg(
-        all_names=pd.NamedAgg(column='file', aggfunc=','.join))
-    # add CSV file names to SES dataset
-    new_ses_data['data_stream_file_names'] = new_ses_data.apply(
-        lambda row: get_stream_names(aggregate, row['NAME10']), axis=1)
-    # number of datastream CSV files for each tract
-    new_ses_data['datastream_counts'] = new_ses_data.apply(
-        lambda row: count_csv_files(row['data_stream_file_names']),
+        all_names=pd.NamedAgg(column="file", aggfunc=",".join))
+
+    # Add CSV file names to SES dataset
+    new_ses_data["data_stream_file_names"] = new_ses_data.apply(
+        lambda row: get_stream_names(aggregate, row["NAME10"]), axis=1)
+
+    # Number of datastream CSV files for each tract.
+    new_ses_data["datastream_counts"] = new_ses_data.apply(
+        lambda row: count_csv_files(row["data_stream_file_names"]),
         axis=1)
-    # number of Sensors in each tract (number of CSV files divided by 4)
-    new_ses_data['sensor_counts'] = new_ses_data['datastream_counts'] / 4
-    for count in new_ses_data['sensor_counts']:
+
+    # Number of Sensors in each tract (number of CSV files divided by 4).
+    new_ses_data["sensor_counts"] = new_ses_data["datastream_counts"] / 4
+    for count in new_ses_data["sensor_counts"]:
         if count.is_integer() is False:
-            raise ValueError('A sensor in Tract %s has fewer than four inputs.'
-                             % new_ses_data['NAME10'])
+            raise ValueError("A sensor in Tract %s has fewer than four inputs."
+                             % new_ses_data["NAME10"])
+
+    # Give SES fields friendlier names.
+    new_ses_data = new_ses_data.rename(columns=ses_name_mappings)
+
     return new_ses_data
 
 
@@ -101,7 +112,7 @@ def get_stream_names(data_array, name10):
         given in the Args. Returns nan if there are no datastreams.
     """
     try:
-        names = data_array['all_names'][name10]
+        names = data_array["all_names"][name10]
     except (NameError, KeyError):
         names = np.nan
     return names
@@ -121,6 +132,42 @@ def count_csv_files(files_string):
         counts (int): number of CSV files
     """
     new_files_string = str(files_string)
-    if new_files_string == 'nan':
+    if new_files_string == "nan":
         return 0
     return new_files_string.count(",") + 1
+
+
+ses_name_mappings = {
+    "PCT_PEOPLE": "percent_people_of_color",
+    "PTL_PEOPLE": "percentile_people_of_color",
+    "PCT_ENGLIS": "percent_english_language_learners",
+    "PTL_ENGLIS": "percentile_english_language_learners",
+    "PCT_FOREIG": "percent_foreign_born",
+    "PTL_FOREIG": "percentile_foreign_born",
+    "PCT_POP_IN": "percent_income_below_200%_poverty_level",
+    "PTL_POP_IN": "percentile_income_below_200%_poverty_level",
+    "PCT_LESS_B": "percent_less_than_bachelors_degree",
+    "PTL_LESS_B": "percentile_less_than_bachelors_degree",
+    "PCT_ADULTN": "percent_no_leisurely_excercise",
+    "PCT_ADULT_": "percent_adult_diabetes",
+    "PCT_ADUL_1": "percent_adult_obese",
+    "PCT_ADULTM": "percent_mental_health_not_good",
+    "PCT_ADUL_2": "percent_adult_asthma",
+    "PCT_ADUL_3": "percent_adult_disabilities",
+    "PCT_LOW_LI": "percent_adult_low_life_expectancy_at_birth",
+    "PTL_ADULTN": "percentile_no_leisurely_excercise",
+    "PTL_ADULT_": "percentile_adult_diabetes",
+    "PTL_ADUL_1": "percentile_adult_obese",
+    "PTL_ADULTM": "percentile_mental_health_not_good",
+    "PTL_ADUL_2": "percentile_adult_asthma",
+    "PTL_ADUL_3": "percentile_adult_disabilities",
+    "PTL_LOW_LI": "percentile_adult_low_life_expectancy_at_birth",
+    "COMPOSITE_": "composite_percentile",
+    "COMPOSIT_1": "composite_quintile",
+    "RACE_ELL_O": "race_english_origins_percentile",
+    "RACE_ELL_1": "race_english_origins_quintile",
+    "SOCIOECONO": "socioenconomic_percentile",
+    "SOCIOECO_1": "socioeconomic_quintile",
+    "HEALTH_PER": "health_percentile",
+    "HEALTH_QUI": "health_quintile"
+}

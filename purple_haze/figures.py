@@ -28,6 +28,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as sc_stats
 import altair as alt
+import matcher as match
 
 def sensor_count_plotting(ses_metric, renamed_ses_data):
     """Creates a scatter plot with linear regression of an SES metric and sensor counts
@@ -153,8 +154,16 @@ def make_widgets(renamed_ses_data):
     """
 
     # metric lists
-    ses_metric_list = ['COMPOSITE', 'SOCIOECONO', 'HEALTH', 'POC_PRCT', 'NON_ENGLISH', 'LOW_INCOME']
-    aqi_metric_list = ['mean_aqi','exp100', 'exp150', 'mean_aqi_ns', 'exp100_ns', 'exp150_ns']
+    ses_metric_list = match.ses_name_mappings.values()
+
+    aqi_metric_list = [
+        'mean_aqi',
+        'exposure_aqi100',
+        'exposure_aqi150',
+        'mean_aqi_no_smoke',
+        'exposure_aqi100_no_smoke',
+        'exposure_aqi150_no_smoke'
+    ]
 
     # interactive widgets
     sensor = widgets.interactive(sensor_count_plotting,
