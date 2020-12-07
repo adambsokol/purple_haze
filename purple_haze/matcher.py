@@ -46,7 +46,7 @@ def station_matcher(data_stream_df):
     provided as a single string, with paths separated by commas.
     """
     # load socioeconomic dataset
-    ses_file = 'data/seattle_ses_data/ses_data.shp'
+    ses_file = '../data/seattle_ses_data/ses_data.shp'
     ses_data = gpd.read_file(ses_file)
     new_ses_data = ses_data.to_crs(epsg=4326)
     # convert input to GeoDataFrame using lat/lon
