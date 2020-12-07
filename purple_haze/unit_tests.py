@@ -39,93 +39,93 @@ class AirTests(unittest.TestCase):
         sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
         assert len(sensor_data) > 0
 
-    def test_smoke_tract_files_to_sensors(self):
-        '''
-        Smoke test for air module
-        Function: tract_files_to_sensors
+#     def test_smoke_tract_files_to_sensors(self):
+#         '''
+#         Smoke test for air module
+#         Function: tract_files_to_sensors
                 
-        Returns:
-            bool:
-                True if successful, False otherwise.
+#         Returns:
+#             bool:
+#                 True if successful, False otherwise.
             
-        Test passes if True
-        '''
-        sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
-        matched_ses_data = matcher.station_matcher(sensor_data)
+#         Test passes if True
+#         '''
+#         sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
+#         matched_ses_data = matcher.station_matcher(sensor_data)
         
-        sensors = matched_ses_data.apply(lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
+#         sensors = matched_ses_data.apply(lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
         
-        assert len(sensors) > 0
+#         assert len(sensors) > 0
 
-    def test_smoke_get_tract_mean_aqi(self):
-        '''
-        Smoke test for air module
-        Function: tract_files_to_sensors
+#     def test_smoke_get_tract_mean_aqi(self):
+#         '''
+#         Smoke test for air module
+#         Function: tract_files_to_sensors
                 
-        Returns:
-            bool:
-                True if successful, False otherwise.
+#         Returns:
+#             bool:
+#                 True if successful, False otherwise.
             
-        Test passes if True
-        '''
-        sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
-        matched_ses_data = matcher.station_matcher(sensor_data)
+#         Test passes if True
+#         '''
+#         sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
+#         matched_ses_data = matcher.station_matcher(sensor_data)
         
-        matched_ses_data['mean_aqi'] = matched_ses_data.apply(lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
-        assert len(matched_ses_data['mean_aqi']) > 0
+#         matched_ses_data['mean_aqi'] = matched_ses_data.apply(lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
+#         assert len(matched_ses_data['mean_aqi']) > 0
     
-    def test_smoke_get_tract_exposure_100(self):
-        '''
-        Smoke test for air module
-        Function: get_tract_exposure
+#     def test_smoke_get_tract_exposure_100(self):
+#         '''
+#         Smoke test for air module
+#         Function: get_tract_exposure
                 
-        Returns:
-            bool:
-                True if successful, False otherwise.
+#         Returns:
+#             bool:
+#                 True if successful, False otherwise.
             
-        Test passes if True
-        '''
-        sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
-        matched_ses_data = matcher.station_matcher(sensor_data)
+#         Test passes if True
+#         '''
+#         sensor_data = air.files_to_dataframe(glob.glob('../data/purple_air/*'))
+#         matched_ses_data = matcher.station_matcher(sensor_data)
         
-        matched_ses_data['exp100'] = matched_ses_data.apply(lambda row: air.get_tract_exposure(row, 100), axis=1)
-        assert len(matched_ses_data['exp100']) > 0
+#         matched_ses_data['exp100'] = matched_ses_data.apply(lambda row: air.get_tract_exposure(row, 100), axis=1)
+#         assert len(matched_ses_data['exp100']) > 0
         
-    def test_oneshot_aqi(self):
-        '''
-        One-shot test for air module
-        Function: aqi
+#     def test_oneshot_aqi(self):
+#         '''
+#         One-shot test for air module
+#         Function: aqi
         
-        Using the EPA calculator (https://cfpub.epa.gov/airnow/index.cfm?action=airnow.calculator), test if PM 2.5-to-AQI cacluator is accurate
+#         Using the EPA calculator (https://cfpub.epa.gov/airnow/index.cfm?action=airnow.calculator), test if PM 2.5-to-AQI cacluator is accurate
                 
-        Returns:
-            bool:
-                True if successful, False otherwise.
+#         Returns:
+#             bool:
+#                 True if successful, False otherwise.
             
-        Test passes if True
-        '''
-        pm25 = 45
-        aqi = air.aqi(pm25)
-        print(aqi)
-        assert np.isclose(np.rint(aqi),124)
+#         Test passes if True
+#         '''
+#         pm25 = 45
+#         aqi = air.aqi(pm25)
+#         print(aqi)
+#         assert np.isclose(np.rint(aqi),124)
     
-    def test_edge_aqi(self):
-        '''
-        Edge test for air module
-        Function: aqi
+#     def test_edge_aqi(self):
+#         '''
+#         Edge test for air module
+#         Function: aqi
         
-        Using the EPA calculator (https://cfpub.epa.gov/airnow/index.cfm?action=airnow.calculator), test if PM 2.5-to-AQI cacluator is accurate
+#         Using the EPA calculator (https://cfpub.epa.gov/airnow/index.cfm?action=airnow.calculator), test if PM 2.5-to-AQI cacluator is accurate
                 
-        Returns:
-            bool:
-                True if successful, False otherwise.
+#         Returns:
+#             bool:
+#                 True if successful, False otherwise.
             
-        Test passes if True
-        '''
-        pm25 = -45
-        with self.assertRaises(ValueError):
-            error = air.aqi(pm25)
-            print(error)
+#         Test passes if True
+#         '''
+#         pm25 = -45
+#         with self.assertRaises(ValueError):
+#             error = air.aqi(pm25)
+#             print(error)
             
     def test_oneshot_remove_utc(self):
         '''
@@ -190,8 +190,10 @@ class MatcherTests(unittest.TestCase):
         new_ses_data['data_stream_file_names'] = new_ses_data.apply(
             lambda row: matcher.get_stream_names(aggregate, row['NAME10']), axis=1)
         
-        our_names = new_ses_data[new_ses_data['data_stream_file_names'].isna() == False]
-        assert our_names['data_stream_file_names'].iloc[0].startswith('../data/purple_air/Green Lake SE')
+        
+        
+        our_names = new_ses_data['data_stream_file_names'].dropna()
+        assert our_names.iloc[0].startswith('../data/purple_air/Green Lake SE')
 
     def test_edge_get_stream_names(self):
         '''
@@ -239,8 +241,8 @@ class MatcherTests(unittest.TestCase):
         new_ses_data['data_stream_file_names'] = new_ses_data.apply(
             lambda row: matcher.get_stream_names(aggregate, row['NAME10']), axis=1)
         
-        our_names = new_ses_data[new_ses_data['data_stream_file_names'].isna() == False]
-        assert our_names['data_stream_file_names'].iloc[0].startswith('High Woodlands (outside)') is False
+        our_names = new_ses_data['data_stream_file_names'].dropna()
+        assert our_names.iloc[0].startswith('High Woodlands (outside)') is False
 
     def test_smoke_station_matcher(self):
         '''
