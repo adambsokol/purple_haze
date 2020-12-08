@@ -3,7 +3,7 @@
 ## Components
 
 ##### 1. Organizing Purple Air Data Files
-We will use the term *sensor* to refer to a single Purple Air monitoring unit that can be purchased by any member of the public and stationed in any indoor or outdoor location. The data from each sensor is spread across four CSV files; we will refer to the data within each these file as a *data stream*. The four data streams are:
+We will use the term *sensor* to refer to a single Purple Air monitoring unit that can be purchased by any member of the public and stationed in any indoor or outdoor location. The data from each sensor is spread across four CSV files; we will refer to the data within each of these files as a *data stream*. The four data streams are:
 1. Channel A (Primary)
 2. Channel A (Secondary)
 3. Channel B (Primary)
@@ -21,7 +21,7 @@ This component reads and manipulates air quality data once the data streams have
 - determining which data variables are to be used for analysis (this depends on whether the sensor is indoors or outdoors)
 - calculating Air Quality Index (AQI)
 - combining data from all of the sensors located within a single census tract
-- calculating air quality statistics for each census tract, including correlations with socioeconomiic indicators
+- calculating air quality statistics for each census tract, including mean AQI and mean AQI without the 2020 wildfire smoke event
 
 **Inputs**: geopandas dataframe containing socioeconomic data and data stream file paths for each census tract
 
@@ -29,24 +29,24 @@ This component reads and manipulates air quality data once the data streams have
 
 ##### 3. Visualization
 The visualization component allows users to access and understand the data in a meaningful way. This component aims to do the following:
-- Determine and display how the average number of sensors in a census tract is related to the racial and socioeconomic composition of that census tract
-- Determine and display how the average air quality of a census tract is related to the racial and socioeconomic composition of that census tract
-- Provide the user with the option to view and explore the data using different racial and socioeconomic metrics
+- Determine and display how the number of sensors in a census tract is related to the racial and socioeconomic composition of the census tracts sharing the same number of sensors
+- Determine and display how the air quality statistic of a census tract is related to the racial and socioeconomic composition of that census tract
+- Output a census tract map of Seattle colored by a user-specified socioeconomic, demographic, or health metric
 
 **Inputs**: geopandas dataframe containing socioeconomic data and air quality statistics for each census tract calculated from Purple Air sensors
 
-**Outputs**: a variety of plots, with optional user input, in a Jupyter notebook to explore relationships between Purple Air sensor locations, air quality data, and socioeconomic data
+**Outputs**: a variety of plots, with optional user input, in a Jupyter notebook to explore relationships between the number of Purple Air sensors within census tracts, air quality data, and socioeconomic data
 
 ## Interactions
 
-##### 1. User can select which socioeconomic metric they would like to use. This metric will then be regressed against Purple Air sensors and air quality data by census tract and displayed with appropriate plots. This requires interaction between our data analysis component (#2) and our visualization component (#3).
+##### 1. User can select via dropdown which socioeconomic metric they would like to use in the choropleth map and both scatter plots. This metric will then be regressed against number of PurpleAir sensors and air quality data by census tract and displayed with appropriate plots. This requires interaction between all three components..
 
-##### 2. The user can hover over a map of Seattle and select data from a single census tract. This selection will then display socioeconomic data, quantity of Purple Air sensors, and air quality data for that census tract. This requires interactions between all three components.
+##### 2. The user can hover over a map of Seattle to get census tract number. This requires only our visualization component (#3).
+
+##### 3. User can select which air quality statistical variable they would like to use in the lower scatter plot chart. This metric will then be regressed against the user-selected socioeconomic metric and displayed with appropriate appropriate plots. This requires interaction between our data analysis component (#2) and our visualization component (#3).
 
 ## Preliminary Plan
- 1. Configure our continuous integration setup. 
- 2. Determine visualization engine. As of now, we are still uncertain about how we will present our interactive maps and whether these maps will be embedded in a Jupyter notebook or some other format. 
- 3. Determine statistical relationships to be visualized. 
- 4. Implement thorough testing using unittest. 
-
+ 1. Implement thorough testing using unittest. 
+ 2. Improve map by adding additional tooltips (number of sensors in a census tract, etc).
+ 3. Improve visualization for readability in labels.
  

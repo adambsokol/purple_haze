@@ -7,9 +7,20 @@ It has been established that air pollution and health effects associated with it
 1. Is the distribution of PurpleAir sensors in Seattle equitable?
 2. Are people of disadvantaged socioeconomic status or race disproportionately affected by poor air quality?
 
-### User Profile
+### User Profiles
 
-Our primary user is a researcher. The researcher will use our package to easily interface with both datasets and uncover relationships between combined metrics. The researcher is a proficient user of Jupyter Notebook and can program in Python. 
+Our primary users are researchers. The researchers will use our package to easily interface with both datasets and uncover relationships between combined metrics. The researcher is a proficient user of Jupyter Notebook or Jupyter Lab and can program in Python.
+
+#### Example User Profile Number One:
+Rea Elprup, Unpaid summer intern, PurpleAir
+* wants to know who in Seattle is buying sensors
+* wants to know some demographic info about where the sensors are being installed to inform future expansion
+
+#### Example User Profile Number Two:
+Bess Twishes, Grad Student, UW
+* studying the effects of air quality on residents in formerly red-lined neighborhoods
+* wondering if PurpleAir can provide some hyper-local data that is not available from other sources
+ 
 
 ### Data Sources
 
@@ -86,9 +97,11 @@ Source: https://data.seattle.gov/dataset/Racial-and-Social-Equity-Composite-Inde
 
 ### Use Cases
 
-#### Use Case 1: Find the number of PurpleAir sensors within a census tract in Seattle.
-* The user will be able to look at our visualization to get a broad sense of PurpleAir sensor distribution among the census tracts. 
-* The user will be able to use Python with the Jupyter Notebook to make inquiries within our GeoPandas dataframe.
+#### Use Case 1: I want to find out how the number of PurpleAir sensors within a census tract in Seattle depends on demographic, socioeconomic, and health metrics. 
+* The user will be able to perform their own data analysis with the Jupyter Notebook to make inquiries within our GeoPandas dataframe.
+* The user can also view their analysis work in one clean application with Voila.
+* The user will be able to see how the sensor distribution (number in each census tract) is related to socioeconomic factors with a dropdown interaction in a scatter plot.
 
-#### Use Case 2: Compute the PM2.5 and AQI averages for each census tract in Seattle.
-* The user will hover over a census tract in our visualization and will generate a tooltip containing census identification, summary statistics of PM2.5 and AQI, and the Composite Index for that census tract.
+#### Use Case 2: I want to explore the relation between a census tract's mean AQI and a census tract's socioeconomic, demographic, and health metrics. 
+* The user will hover over a census tract in our interactive map of Seattle and will generate a tooltip containing the census tract identification number.
+* The user can select an AQI option and a socioeconomic option as dropdowns to be plotted on a scatter chart.
