@@ -26,12 +26,12 @@ To install and run this locally do the following:
 1. clone the repository: git clone https://github.com/adambsokol/purple_haze.git
 2. create a conda environment for this project: conda env create -q -n purple_haze --file environment.yml
 3. activate the environment: conda activate purple_haze
-4. if using jupyter lab see 4a/b, otherwise skip to 5
-4a. install a few Jupyterlab extensions. You can either run the shell script: bash lab_extensions.sh
-4b. or you can do it manually be running the following in the command line:
-        jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
-        jupyter labextension install @jupyter-voila/jupyterlab-preview --no-build
-        jupyter lab build
+4. if using jupyter lab see 4a/b, otherwise skip to 5 <br>
+4a. install a few Jupyterlab extensions. You can either run the shell script: bash lab_extensions.sh <br>
+4b. or you can do it manually be running the following in the command line: <br>
+        jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build <br>
+        jupyter labextension install @jupyter-voila/jupyterlab-preview --no-build <br>
+        jupyter lab build <br>
 5. to simply view the data, in the command line run: voila purple_haze_app.ipynb --no-browser
 6. then launch your corresponding local host in a web browser. Typically this means going to the site 'localhost:8888'
 7. if you want to explore the data in more detail you can launch jupyter and open purple_haze_app.ipynb
@@ -74,16 +74,16 @@ purple_haze/
 ```
 
 ### Project Data
-PurpleAir data
--Includes only sensors in or near Seattle
--Time series of PM2.5 concentrations from May 1st to Nov. 1st 2020
--60 minute averaged data
+PurpleAir data <br>
+-Includes only sensors in or near Seattle <br>
+-Time series of PM2.5 concentrations from May 1st to Nov. 1st 2020 <br>
+-60 minute averaged data <br>
 -Source: https://www.purpleair.com/map
 
     
 Socioeconomic data <br>
--Census level data within Seattle
--Includes demographic, socioeconomic, and health metric data
+-Census level data within Seattle <br>
+-Includes demographic, socioeconomic, and health metric data <br>
 -Source: https://data.seattle.gov/dataset/Racial-and-Social-Equity-Composite-Index/da35-mm5v
 
 
