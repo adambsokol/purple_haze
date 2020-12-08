@@ -27,8 +27,8 @@ To install and run this locally do the following:
 2. create a conda environment for this project: conda env create -q -n purple_haze --file environment.yml
 3. activate the environment: conda activate purple_haze
 4. if using jupyter lab see 4a/b, otherwise skip to 5
-    4a. install a few Jupyterlab extensions. You can either run the shell script: bash lab_extensions.sh
-    4b. or you can do it manually be running the following in the command line:
+4a. install a few Jupyterlab extensions. You can either run the shell script: bash lab_extensions.sh
+4b. or you can do it manually be running the following in the command line:
         jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
         jupyter labextension install @jupyter-voila/jupyterlab-preview --no-build
         jupyter lab build
@@ -75,16 +75,16 @@ purple_haze/
 
 ### Project Data
 PurpleAir data
-    -Includes only sensors in or near Seattle
-    -Time series of PM2.5 concentrations from May 1st to Nov. 1st 2020
-    -60 minute averaged data
-    -Source: https://www.purpleair.com/map
+-Includes only sensors in or near Seattle
+-Time series of PM2.5 concentrations from May 1st to Nov. 1st 2020
+-60 minute averaged data
+-Source: https://www.purpleair.com/map
 
     
 Socioeconomic data
-    -Census level data within Seattle
-    -Includes demographic, socioeconomic, and health metric data
-    -Source: https://data.seattle.gov/dataset/Racial-and-Social-Equity-Composite-Index/da35-mm5v
+-Census level data within Seattle
+-Includes demographic, socioeconomic, and health metric data
+-Source: https://data.seattle.gov/dataset/Racial-and-Social-Equity-Composite-Index/da35-mm5v
 
 
 ### Project History
