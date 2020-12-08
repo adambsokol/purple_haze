@@ -83,10 +83,6 @@ def station_matcher(
 
     # Number of Sensors in each tract (number of CSV files divided by 4).
     new_ses_data["sensor_counts"] = new_ses_data["datastream_counts"] / 4
-    for count in new_ses_data["sensor_counts"]:
-        if count.is_integer() is False:
-            raise ValueError("A sensor in Tract %s has fewer than four inputs."
-                             % new_ses_data["NAME10"])
 
     # Give SES fields friendlier names.
     new_ses_data = new_ses_data.rename(columns=ses_name_mappings)
