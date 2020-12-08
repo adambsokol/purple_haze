@@ -64,7 +64,9 @@ purple_haze/
       |- figures.py
       |- matcher.py
       |- purple_haze_app.ipynb
-      |- test_modules.py
+   |- tests/
+      |- __init__.py
+      |- test_ph.py
    |- .travis.yml
    |- LICENSE
    |- README.md
