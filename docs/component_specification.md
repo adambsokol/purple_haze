@@ -39,7 +39,7 @@ The visualization component allows users to access and understand the data in a 
 
 ## Interactions
 
-##### 1. User can select via dropdown which socioeconomic metric they would like to use in the choropleth map and both scatter plots. This metric will then be regressed against number of PurpleAir sensors and air quality data by census tract and displayed with appropriate plots. This requires interaction between all three components..
+##### 1. User can select via dropdown which socioeconomic metric they would like to use in the choropleth map and both scatter plots. This metric will then be regressed against number of PurpleAir sensors and air quality data by census tract and displayed with appropriate plots. This requires interaction between all three components.
 
 ##### 2. The user can hover over a map of Seattle to get census tract number. This requires only our visualization component (#3).
 
