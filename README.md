@@ -81,7 +81,7 @@ PurpleAir data
 -Source: https://www.purpleair.com/map
 
     
-Socioeconomic data
+Socioeconomic data \n
 -Census level data within Seattle
 -Includes demographic, socioeconomic, and health metric data
 -Source: https://data.seattle.gov/dataset/Racial-and-Social-Equity-Composite-Index/da35-mm5v
