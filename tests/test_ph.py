@@ -3,8 +3,13 @@
 '''Set of tests for purple_haze modules
 
     Args:
-        None
-
+        References data in data/
+            seattle_ses_data/*
+            purple_air/*
+        and modules in purple_haze/
+            air.py
+            matcher.py
+ 
 ... Read more on the README:
 https://github.com/UWSEDS/hw3-gretashum/blob/master/README.md
 
@@ -185,7 +190,7 @@ class AirTests(unittest.TestCase):
         matched_ses_data_missing_names = matched_ses_data.drop(['data_stream_file_names'], axis=1)
         with self.assertRaises(ValueError):
             error = matched_ses_data_missing_names.apply(
-            lambda df_row: air.get_tract_mean_exposure(df_row), axis=1)
+            lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
             print(error)
 
     def test_oneshot_aqi(self):
