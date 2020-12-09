@@ -130,7 +130,7 @@ class AirTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             error = matched_ses_data_missing_names.apply(
             lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
-            print(error)
+#             print(error)
 
     def test_smoke_get_tract_exposure_100(self):
         '''
@@ -191,7 +191,7 @@ class AirTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             error = matched_ses_data_missing_names.apply(
             lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
-            print(error)
+#             print(error)
 
     def test_oneshot_aqi(self):
         '''
@@ -231,7 +231,7 @@ class AirTests(unittest.TestCase):
         pm25 = -45
         with self.assertRaises(ValueError):
             error = air.aqi(pm25)
-            print(error)
+#             print(error)
 
     def test_oneshot_remove_utc(self):
         '''
@@ -473,8 +473,7 @@ class MatcherTests(unittest.TestCase):
             error = matcher.station_matcher(
                 test_sensor_data,
                 ses_directory='data/seattle_ses_data/ses_data.shp')
-            print(error)
+#             print(error)
 
 
-if __name__ == '__main__':
-    unittest.main()
+
