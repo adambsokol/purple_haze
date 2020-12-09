@@ -146,6 +146,48 @@ class AirTests(unittest.TestCase):
             lambda row: air.get_tract_exposure(row, 100), axis=1)
         assert len(matched_ses_data['exp100']) > 0
 
+    def test_edge_get_tract_exposure_0(self):
+        '''
+        Edge test for air module
+        Function: get_tract_exposure
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+        sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
+        matched_ses_data = matcher.station_matcher(
+            sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
+
+        with self.assertRaises(TypeError):
+            error = matched_ses_data.apply(
+            lambda row: air.get_tract_exposure(row, aqi_threshold = '100'), axis=1)
+
+    def test_edge_get_tract_exposure_1(self):
+        '''
+        Edge test for air module
+        Function: get_tract_exposure
+
+        check to make sure it has column, 'data_stream_file_names'
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+        sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
+        matched_ses_data = matcher.station_matcher(
+            sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
+
+        matched_ses_data_missing_names = matched_ses_data.drop(['data_stream_file_names'], axis=1)
+        with self.assertRaises(ValueError):
+            error = matched_ses_data_missing_names.apply(
+            lambda df_row: air.get_tract_mean_exposure(df_row), axis=1)
+            print(error)
+
     def test_oneshot_aqi(self):
         '''
         One-shot test for air module
