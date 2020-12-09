@@ -36,16 +36,14 @@ To install and run this locally do the following:
 6. then launch your corresponding local host in a web browser. Typically this means going to the site 'localhost:8888'
 7. if you want to explore the data in more detail you can launch jupyter and open purple_haze_app.ipynb
 
-The dashboard 
+Video examples of running the dashboard can be found inn `examples/`. As shown below, Voila displays our application, with instructions provided at the top. The dashboard contains an interactive choropleth map with the ability to download images as well as two interactive scatterplot to facilitate analysis. In each, the data is linearly regressed and the coefficient of determination is printed on the figure. 
+
+![Dashboard demo showing choropleth map and two scatterplots combining PurpleAir and City of Seattle data](examples/dashboard.png?raw=true "Title")
 
 ### Directory Summary
 The directory has appropriately named data, docs, and example folders. Project code lies in the purple_haze directory.
 
 ### Directory Structure
-
-Video examples of running the dashboard can be found inn `examples/`. As shown below, Voila displays our application, with instructions provided at the top. The dashboard contains an interactive choropleth map with the ability to download images as well as two interactive scatterplot to facilitate analysis. In each, the data is linearly regressed and the coefficient of determination is printed on the figure. 
-
-![Dashboard demo showing choropleth map and two scatterplots combining PurpleAir and City of Seattle data](examples/dashboard.png?raw=true "Title")
 
 ```
 purple_haze/
