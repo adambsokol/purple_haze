@@ -9,7 +9,7 @@
         and modules in purple_haze/
             air.py
             matcher.py
- 
+
 ... Read more on the README:
 https://github.com/UWSEDS/hw3-gretashum/blob/master/README.md
 
@@ -104,9 +104,10 @@ class AirTests(unittest.TestCase):
 
         # making test input with no column called 'data_stream_file_names'
         non_smoke_matched_data = matched_ses_data.apply(
-            lambda df_row: air.get_tract_mean_aqi(df_row, include_smoke = False), axis=1)
+            lambda df_row: air.get_tract_mean_aqi(
+                df_row, include_smoke=False), axis=1)
         print(non_smoke_matched_data.head)
-        
+
     def test_edge_get_tract_mean_aqi(self):
         '''
         Edge test for air module
@@ -127,11 +128,12 @@ class AirTests(unittest.TestCase):
             sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
 
         # making test input with no column called 'data_stream_file_names'
-        matched_ses_data_missing_names = matched_ses_data.drop(['data_stream_file_names'], axis=1)
+        matched_ses_data_missing_names = matched_ses_data.drop(
+            ['data_stream_file_names'], axis=1
+        )
         with self.assertRaises(ValueError):
-            error = matched_ses_data_missing_names.apply(
-            lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
-#             print(error)
+            matched_ses_data_missing_names.apply(
+                lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
 
     def test_smoke_get_tract_exposure_100(self):
         '''
@@ -168,8 +170,9 @@ class AirTests(unittest.TestCase):
             sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
 
         with self.assertRaises(TypeError):
-            error = matched_ses_data.apply(
-            lambda row: air.get_tract_exposure(row, aqi_threshold = '100'), axis=1)
+            matched_ses_data.apply(
+                lambda row: air.get_tract_exposure(
+                    row, aqi_threshold='100'), axis=1)
 
     def test_edge_get_tract_exposure_1(self):
         '''
@@ -188,11 +191,11 @@ class AirTests(unittest.TestCase):
         matched_ses_data = matcher.station_matcher(
             sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
 
-        matched_ses_data_missing_names = matched_ses_data.drop(['data_stream_file_names'], axis=1)
+        matched_ses_data_missing_names = matched_ses_data.drop(
+            ['data_stream_file_names'], axis=1)
         with self.assertRaises(ValueError):
-            error = matched_ses_data_missing_names.apply(
-            lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
-#             print(error)
+            matched_ses_data_missing_names.apply(
+                lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
 
     def test_oneshot_aqi(self):
         '''
@@ -231,8 +234,7 @@ class AirTests(unittest.TestCase):
         '''
         pm25 = -45
         with self.assertRaises(ValueError):
-            error = air.aqi(pm25)
-#             print(error)
+            air.aqi(pm25)
 
     def test_oneshot_remove_utc(self):
         '''
@@ -471,10 +473,6 @@ class MatcherTests(unittest.TestCase):
                 'data/purple_air/Wallingford Seattle WA B (outside)*'
             ))
         with self.assertRaises(TypeError):
-            error = matcher.station_matcher(
+            matcher.station_matcher(
                 test_sensor_data,
                 ses_directory='data/seattle_ses_data/ses_data.shp')
-#             print(error)
-
-
-
