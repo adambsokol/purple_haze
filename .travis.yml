@@ -35,7 +35,7 @@ before_script:
     - flake8 purple_haze/matcher.py
     - flake8 purple_haze/air.py
     - flake8 purple_haze/figures.py
-    - flake8 tests/test_ph.py
+    - flake8 purple_haze/tests/test_ph.py
 
 # the actual commands to run
 script:
