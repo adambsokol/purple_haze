@@ -19,9 +19,11 @@ It has been established that both short-term and long-term exposure to poor air 
 * Adam Sokol
 
 ### Software dependencies and license information
+All first-level software dependencies are listed in the environment.yml file. This does not include all software dependencies as many of the listed packages have their own dependencies. <br>
+This package is licensed under the MIT license which allows generally free and open use, in-line with our desire for this software to be used by whomever may find it useful.
 
 ### Installation
-To install and run this locally do the following:
+To install and run this locally do the following: <br>
 0. install conda if you have not already done so
 1. clone the repository: git clone https://github.com/adambsokol/purple_haze.git
 2. create a conda environment for this project: conda env create -q -n purple_haze --file environment.yml
@@ -33,7 +35,7 @@ To install and run this locally do the following:
         jupyter labextension install @jupyter-voila/jupyterlab-preview --no-build <br>
         jupyter lab build <br>
 5. to simply view the data, in the command line run: voila purple_haze_app.ipynb --no-browser
-6. then launch your corresponding local host in a web browser. Typically this means going to the site 'localhost:8888'
+6. then launch your corresponding local host in a web browser. Typically this means going to the site 'localhost:8866'
 7. if you want to explore the data in more detail you can launch jupyter and open purple_haze_app.ipynb
 
 Video examples of running the dashboard can be found in `examples/`. As shown below, Voila displays our application, with instructions provided at the top. The dashboard contains an interactive choropleth map with the ability to download images as well as two interactive scatterplot to facilitate analysis. In each, the data is linearly regressed and the coefficient of determination is printed on the figure. 
@@ -41,7 +43,7 @@ Video examples of running the dashboard can be found in `examples/`. As shown be
 ![Dashboard demo showing choropleth map and two scatterplots combining PurpleAir and City of Seattle data](examples/dashboard.png?raw=true "Dashboard Example")
 
 ### Directory Summary
-The directory has appropriately named data, docs, and example folders. Project code lies in the purple_haze directory.
+The directory has appropriately named data, docs, and example folders. Project code lies in the purple_haze directory. The purple_haze_app.ipynb lies in the purple_haze folder as it provides the core of the code that allows the data to display using Voila.
 
 ### Directory Structure
 
