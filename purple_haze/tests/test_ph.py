@@ -30,10 +30,13 @@ from purple_haze import air
 
 
 class AirTests(unittest.TestCase):
-    def test_smoke_files_to_dataframe(self):
+    def test_edge_files_to_dataframe_0(self):
         '''
-        Smoke test for air module
+        Edge test for air module
         Function: files_to_dataframe
+
+        Tests to see if __init__ catches error of
+        entering files without being string
 
         Returns:
             bool:
@@ -41,8 +44,110 @@ class AirTests(unittest.TestCase):
 
         Test passes if True
         '''
-        sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
-        assert len(sensor_data) > 0
+        with self.assertRaises(TypeError):
+            air.files_to_dataframe(glob(glob(5)))
+
+    def test_edge_files_to_dataframe_1(self):
+        '''
+        Edge test for air module
+        Function: files_to_dataframe
+
+        Tests to see if __init__ catches error of
+        entering files without being string
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+        foo = 5
+        with self.assertRaises(TypeError):
+            air.files_to_dataframe(glob.glob(foo))
+
+    def test_edge_files_to_dataframe_2(self):
+        '''
+        Edge test for air module
+        Function: files_to_dataframe
+
+        Checking to see if __init__ catches when
+        file does not end in .csv
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+        with self.assertRaises(ValueError):
+            air.files_to_dataframe(
+                'data/purple_air/10058 *ad (outside) * Primary 60_*11_01_2020'
+            )
+
+    def test_edge_files_to_dataframe_3(self):
+        '''
+        Edge test for air module
+        Function: files_to_dataframe
+
+        Checking to see if __init__ catches when
+        filepath does not contain lat/lons
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+
+        with self.assertRaises(ValueError):
+            air.files_to_dataframe(
+                'data/purple_air/10058 *(outside) (nolat nolon) Prim*.csv'
+            )
+
+    def test_oneshot_files_to_dataframe_0(self):
+        '''
+        One-Shot test for air module
+        Function: files_to_dataframe
+
+        Checking to see if __init__ can tell name even
+        if location is unknown
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+
+        sensor_data = air.files_to_dataframe(
+            [
+                'data/purple_air/Loc (tk) (47.0 -122.0) Primary 11_01_2020.csv'
+            ]
+        )
+        print(sensor_data['sensor_name'])
+        assert sensor_data['sensor_name'][0] == ('Loc').lower()
+
+    def test_oneshot_files_to_dataframe_1(self):
+        '''
+        One-Shot test for air module
+        Function: files_to_dataframe
+
+        Checking to see if __init__ fills in 'undefined'
+        for sensor location if it is not a known location
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+
+        sensor_data = air.files_to_dataframe(
+            [
+                'Loc (unknown_location) (47.0 -122.0) Primary 2020.csv'
+            ]
+        )
+        assert sensor_data['loc'][0] == 'undefined'
 
     def test_smoke_tract_files_to_sensors(self):
         '''
@@ -135,10 +240,10 @@ class AirTests(unittest.TestCase):
             matched_ses_data_missing_names.apply(
                 lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
 
-    def test_smoke_get_tract_exposure_100(self):
+    def test_smoke_get_tract_exposure(self):
         '''
         Smoke test for air module
-        Function: get_tract_exposure_100
+        Function: get_tract_exposure
 
         Returns:
             bool:
@@ -158,6 +263,9 @@ class AirTests(unittest.TestCase):
         '''
         Edge test for air module
         Function: get_tract_exposure
+
+        AQI threshold given as string – should throw error because
+        it should be given as an integer
 
         Returns:
             bool:
@@ -195,7 +303,8 @@ class AirTests(unittest.TestCase):
             ['data_stream_file_names'], axis=1)
         with self.assertRaises(ValueError):
             matched_ses_data_missing_names.apply(
-                lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
+                lambda df_row:
+                air.get_tract_exposure(df_row, aqi_threshold=100), axis=1)
 
     def test_oneshot_aqi(self):
         '''

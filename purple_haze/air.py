@@ -153,12 +153,12 @@ def get_tract_mean_aqi(df_row, include_smoke=True):
                               np.timedelta64(1, "h"))
             dsets = [ds.interp(time=times) for ds in dsets]
 
-            # remove smoke period if desired
-            if not include_smoke:
-                start = np.datetime64("2020-09-08T00:00:00")
-                end = np.datetime64("2020-09-19T23:00:00")
-                dsets = [ds.where((ds.time < start) | (ds.time > end))
-                         for ds in dsets]
+#             # remove smoke period if desired
+#             if not include_smoke:
+#                 start = np.datetime64("2020-09-08T00:00:00")
+#                 end = np.datetime64("2020-09-19T23:00:00")
+#                 dsets = [ds.where((ds.time < start) | (ds.time > end))
+#                          for ds in dsets]
 
             # find hourly mean AQI by averaging together sensors
             hourly_aqi = np.nanmean(np.stack([ds.aqi.values for ds in dsets]),
@@ -307,8 +307,8 @@ def aqi(pm25):
             cat = color
             categorized = True
             break
-        else:
-            pass
+#         else:
+#             pass
 
     # Put in highest category if still not assigned.
     if not categorized:
@@ -475,27 +475,27 @@ class DataStream:
         else:
             self.data_type = 0
 
-    def start_time(self):
-        """Finds beginning of the DataStream's record.
+#     def start_time(self):
+#         """Finds beginning of the DataStream's record.
 
-        The start time is the earliest measurement contained in the
-        DataStream. For sensors that predate the beginning ot the
-        study period (May 1, 2020), the DataStream start time is the
-        beginning of the study period.
+#         The start time is the earliest measurement contained in the
+#         DataStream. For sensors that predate the beginning ot the
+#         study period (May 1, 2020), the DataStream start time is the
+#         beginning of the study period.
 
-        Returns:
-            - start_time (numpy datetime64): the first measurements in
-            the DataStream.
-        """
+#         Returns:
+#             - start_time (numpy datetime64): the first measurements in
+#             the DataStream.
+#         """
 
-        # Grabs the earliest time recorded in the CSV file.
-        start_time = pd.read_csv(self.filepath).created_at.min()
+#         # Grabs the earliest time recorded in the CSV file.
+#         start_time = pd.read_csv(self.filepath).created_at.min()
 
-        # Remove time zone before converting to datetime64.
-        if start_time.endswith("UTC"):
-            start_time = start_time[:-3].strip()
+#         # Remove time zone before converting to datetime64.
+#         if start_time.endswith("UTC"):
+#             start_time = start_time[:-3].strip()
 
-        return np.datetime64(start_time)
+#         return np.datetime64(start_time)
 
     def load(self):
         """Loads measurement data from the DataStream CSV file.
@@ -517,7 +517,7 @@ class DataStream:
 
         for var in drops:
             if var in dset:
-                dset = dset.drop(var)
+                dset = dset.drop_vars(var)
             else:
                 pass
 
