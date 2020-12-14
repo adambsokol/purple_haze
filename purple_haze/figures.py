@@ -7,11 +7,12 @@ scatterplot of census tract socioeconomic metrics against the number of
 Purple Air sensors in each tract.
 
 aqi_plotting(ses_metric, aqi_metric, ses_data): makes a
-scatterplot of a census tract socioeconomic and air quality metrics.
+scatterplot of census tract socioeconomic and air quality metrics.
 
 make_altair_chart(ses_data, SES_metric): creates an Altair
-chart mapping the census tract data and coloring the tracts by a
-selected socioeconomic metric.
+chart mapping the census tract data, coloring the tracts by a
+selected socioeconomic metric, adding an informative tooltip,
+and sizing points by the number of sensors in each census tract.
 
 make_widgets(ses_data): creates two interactive widgets for
 both scatter plots.
@@ -127,8 +128,9 @@ def make_altair_chart(ses_data, ses_metric):
     """Creates a tract-level map of the selected tract-level metric.
 
     This function creates a map of Seattle showing the selected
-    socioeconomic or air quality metric at the census tract level. The
-    map is created using Altair with interactions enabled.
+    socioeconomic or air quality metric at the census tract level with
+    color and number of sensors in each census tract as points by size.
+    The map is created using Altair with interactions and tooltip enabled.
 
     Args:
         - ses_data (GeoDataFrame): contains census tract shapefile data
@@ -138,6 +140,12 @@ def make_altair_chart(ses_data, ses_metric):
         - chart (Altair chart object): the map as a chart object
     """
 
+    # Grab latitudes and longitudes of each tract shape
+    latitude = ses_data.centroid.y
+    longitude = ses_data.centroid.x
+    ses_data["latitude"] = latitude
+    ses_data["longitude"] = longitude
+
     # Convert geopandas data to geojson for use with Altair.
     data = alt.InlineData(
         values=ses_data.__geo_interface__,
@@ -145,6 +153,23 @@ def make_altair_chart(ses_data, ses_metric):
 
     # Choose renderer for proper display with Jupyter and Voila.
     alt.renderers.enable("kaggle")
+
+    # Make the background.
+    background = alt.Chart(data).mark_geoshape(
+        stroke="black",
+        strokeWidth=0.5,
+        fill="white"
+    ).encode(
+        tooltip=[alt.Tooltip("properties.NAME10:N",
+                             title="Census Tract"),
+                 alt.Tooltip("properties.sensor_counts:O",
+                             title="Sensor Counts"),
+                 alt.Tooltip(f"properties.{ses_metric}:N",
+                             title=f"{ses_metric}")]
+    ).properties(
+        width=400,
+        height=750
+    )
 
     # Make the chart.
     chart = alt.Chart(data).mark_geoshape(
@@ -155,13 +180,38 @@ def make_altair_chart(ses_data, ses_metric):
             f"properties.{ses_metric}",
             type="quantitative",
             title=ses_metric),
-        tooltip=[alt.Tooltip("properties.NAME10:N", title="Census Tract")]
+        tooltip=[alt.Tooltip("properties.NAME10:N",
+                             title="Census Tract"),
+                 alt.Tooltip("properties.sensor_counts:O",
+                             title="Sensor Counts"),
+                 alt.Tooltip(f"properties.{ses_metric}:Q",
+                             title=f"{ses_metric}",
+                             format=".3f")]
     ).properties(
         width=400,
-        height=750,
+        height=750
     )
 
-    return chart
+    # Add the markers sized by sensor count.
+    points = alt.Chart(data).mark_circle().encode(
+        longitude='properties.longitude:Q',
+        latitude='properties.latitude:Q',
+        size=alt.Size('properties.sensor_counts:O',
+                      title='Number of Sensors'),
+        color=alt.value('darkorange'),
+        tooltip=[alt.Tooltip("properties.NAME10:N",
+                             title="Census Tract"),
+                 alt.Tooltip("properties.sensor_counts:O",
+                             title="Sensor Counts"),
+                 alt.Tooltip(f"properties.{ses_metric}:Q",
+                             title=f"{ses_metric}",
+                             format=".3f")]
+    ).properties(
+        width=400,
+        height=750
+    )
+
+    return background + chart + points
 
 
 def make_widgets(ses_data):
@@ -182,7 +232,7 @@ def make_widgets(ses_data):
           quality metrics.
     """
 
-    # Retrieve list of socioeconomic matrics.
+    # Retrieve list of socioeconomic metrics.
     ses_metrics = match.ses_name_mappings.values()
 
     # Remove quintile metrics since they are encoded as strings.
@@ -203,17 +253,23 @@ def make_widgets(ses_data):
         sensor_count_plotting,
         ses_metric=widgets.Dropdown(
             options=ses_metric_list,
-            description="Socioeconomic metric"),
+            description="Socioeconomic Metric:",
+            style={'description_width': 'initial'},
+            layout=widgets.Layout(width='auto')),
         ses_data=widgets.fixed(ses_data))
 
     aqi_widget = widgets.interactive(
         aqi_plotting,
         ses_metric=widgets.Dropdown(
             options=ses_metric_list,
-            description="Socioeconomic metric"),
+            description="Socioeconomic Metric:",
+            style={'description_width': 'initial'},
+            layout=widgets.Layout(width='auto')),
         aqi_metric=widgets.Dropdown(
             options=aqi_metric_list,
-            description="Air Quality Metric"),
+            description="Air Quality Metric:",
+            style={'description_width': 'initial'},
+            layout=widgets.Layout(width='auto')),
         ses_data=widgets.fixed(ses_data))
 
     return sensor_widget, aqi_widget
@@ -230,6 +286,25 @@ def display_app(ses_data):
         - ses_data (GeoDataFrame): contains census tract shapefile data
           along with additional Purple Air sensor information.
     """
+
+    # Retrieve list of socioeconomic metrics.
+    ses_metrics = match.ses_name_mappings.values()
+
+    # Remove quintile metrics since they are encoded as strings.
+    ses_metric_list = [met for met in ses_metrics if "quintile" not in met]
+
+    # List of air quality metric options.
+    aqi_metric_list = [
+        "mean_aqi",
+        "exposure_aqi100",
+        "exposure_aqi150",
+        "mean_aqi_no_smoke",
+        "exposure_aqi100_no_smoke",
+        "exposure_aqi150_no_smoke"
+    ]
+
+    # Combined metric list.
+    total_metric_list = ses_metric_list + aqi_metric_list
 
     # Create and format boxes to hold widgets.
     child1 = [widgets.Output()]
@@ -250,7 +325,11 @@ def display_app(ses_data):
         widgets.interact(
             make_altair_chart,
             ses_data=widgets.fixed(ses_data),
-            ses_metric=sorted(ses_data.keys()))
+            ses_metric=widgets.Dropdown(options=total_metric_list,
+                                        description="Socioeconomic " +
+                                                    "or Air Quality Metric",
+                                        style={'description_width': 'initial'},
+                                        layout=widgets.Layout(width='auto')))
 
     with child23[0]:
         display(sensor_widget)
