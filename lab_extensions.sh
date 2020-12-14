@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #Jupyterlab extensions to install and then build
 jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
