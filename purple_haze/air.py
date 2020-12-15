@@ -518,8 +518,8 @@ class DataStream:
         for var in drops:
             if var in dset:
                 dset = dset.drop_vars(var)
-            else:
-                pass
+#             else:
+#                 pass
 
         # Make some friendlier names for the data fields
         rename = {
@@ -540,8 +540,8 @@ class DataStream:
         for old_name, new_name in rename.items():
             if old_name in dset:
                 dset = dset.rename({old_name: new_name})
-            else:
-                pass
+#             else:
+#                 pass
 
         # Assign units
 
@@ -564,8 +564,8 @@ class DataStream:
                 dset[field].attrs["units"] = "hpa"
             elif field == "rh":
                 dset[field].attrs["units"] = "%"
-            else:
-                pass
+#             else:
+#                 pass
 
         tstrings = [remove_utc(ts) for ts in dset["time"].values]
 
@@ -706,21 +706,21 @@ class Sensor:
                 # Should not end up here if previous input checks all passed.
                 pass
 
-    def start_time(self):
-        """ Finds beginning of Sensor's data record.
+#     def start_time(self):
+#         """ Finds beginning of Sensor's data record.
 
-        Similar to DataStream.start_time() but for the Sensor class. If
-        the Sensor's DataStreams have different start times, the
-        earliest is returned.
+#         Similar to DataStream.start_time() but for the Sensor class. If
+#         the Sensor's DataStreams have different start times, the
+#         earliest is returned.
 
-        Returns:
-            numpy datetime64: beginning of data reord.
-        """
+#         Returns:
+#             numpy datetime64: beginning of data reord.
+#         """
 
-        # Start times for each of the four DataStreams
-        start_times = pd.Series([s.start_time() for s in self.datastreams])
+#         # Start times for each of the four DataStreams
+#         start_times = pd.Series([s.start_time() for s in self.datastreams])
 
-        return start_times.min()
+#         return start_times.min()
 
     def load(self):
         """Loads and combines data from the sensor's DataStreams.
