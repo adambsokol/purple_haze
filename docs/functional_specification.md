@@ -9,7 +9,7 @@ It has been established that air pollution and health effects associated with it
 
 ### User Profiles
 
-Our primary users are researchers. The researchers will use our package to easily interface with both datasets and uncover relationships between combined metrics. The researcher is a proficient user of Jupyter Notebook or Jupyter Lab and can program in Python.
+Our primary users are researchers. The researchers will use our package to easily interface with both datasets and uncover relationships between combined metrics. The researcher is a user of Jupyter Notebook or Jupyter Lab and can program in Python.
 
 #### Example User Profile Number One:
 Rea Elprup, Unpaid summer intern, PurpleAir
@@ -100,8 +100,8 @@ Source: https://data.seattle.gov/dataset/Racial-and-Social-Equity-Composite-Inde
 #### Use Case 1: I want to find out how the number of PurpleAir sensors within a census tract in Seattle depends on demographic, socioeconomic, and health metrics. 
 * The user will be able to perform their own data analysis with the Jupyter Notebook to make inquiries within our GeoPandas dataframe.
 * The user can also view their analysis work in one clean application with Voila.
-* The user will be able to see how the sensor distribution (number in each census tract) is related to socioeconomic factors with a dropdown interaction in a scatter plot.
+* The user can look at premade plots to see a map of sensor distribution in Seattle, grouped by census tract, and can compare how the sensor density is related to socioeconomic metrics.
 
 #### Use Case 2: I want to explore the relation between a census tract's mean AQI and a census tract's socioeconomic, demographic, and health metrics. 
-* The user will hover over a census tract in our interactive map of Seattle and will generate a tooltip containing the census tract identification number.
+* The user will hover over a census tract in our interactive map of Seattle and will generate a tooltip containing the census tract identification number and other useful information.
 * The user can select an AQI option and a socioeconomic option as dropdowns to be plotted on a scatter chart.
