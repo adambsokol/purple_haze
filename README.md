@@ -1,7 +1,6 @@
 # Purple Haze
 
 [![Build Status](https://travis-ci.org/adambsokol/purple_haze.svg?branch=main)](https://travis-ci.org/adambsokol/purple_haze)
-
 [![Coverage Status](https://coveralls.io/repos/github/adambsokol/purple_haze/badge.svg?branch=main)](https://coveralls.io/github/adambsokol/purple_haze?branch=main)
 
 ### A Local Urban Investigation on the Correlation Between Air Quality, Demographics, and Socioeconomic and Health Disadvantages
@@ -29,12 +28,12 @@ To install and run this locally do the following: <br>
 2. create a conda environment for this project: conda env create -q -n purple_haze --file environment.yml
 3. activate the environment: conda activate purple_haze
 4. if using jupyter lab see 4a/b, otherwise skip to 5 <br>
-4a. install a few Jupyterlab extensions. You can either run the shell script: bash lab_extensions.sh <br>
+4a. install a few Jupyterlab extensions. You can either run the shell script: bash lab_extensions.sh (Note, that if running on Windows you may need to do the following command: tr -d '\r' < lab_extensions.sh > new_lab_extensions.sh. Then run the new_lab_extensions.sh file) <br>
 4b. or you can do it manually be running the following in the command line: <br>
         jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build <br>
         jupyter labextension install @jupyter-voila/jupyterlab-preview --no-build <br>
         jupyter lab build <br>
-5. to simply view the data, in the command line run: voila purple_haze_app.ipynb --no-browser
+5. to simply view the data, in the command line run: voila purple_haze/purple_haze_app.ipynb --no-browser
 6. then launch your corresponding local host in a web browser. Typically this means going to the site 'localhost:8866'
 7. if you want to explore the data in more detail you can launch jupyter and open purple_haze_app.ipynb
 
@@ -59,24 +58,25 @@ purple_haze/
       |- component_specification.md
       |- functional_specification.md
    |- examples/
-      |- Demo_part1_purple_haze_Trim.mp4
-      |- Demo_part2_purple_haze_Trim.mp4
-      |- Demo_purple_haze.mp4
+      |- dashboard.png
+      |- demo.mp4
+      |- demo_part1.mp4
+      |- demo_part2.mp4
    |- purple_haze/
       |- __init__.py
       |- air.py
       |- figures.py
       |- matcher.py
       |- purple_haze_app.ipynb
-   |- tests/
-      |- __init__.py
-      |- test_ph.py
+      |- tests/
+         |- __init__.py
+         |- test_ph.py
    |- .travis.yml
    |- LICENSE
    |- README.md
-   |- __main__.py
    |- environment.yml
    |- lab_extensions.sh
+   |- setup.py
 ```
 
 ### Project Data
@@ -98,5 +98,3 @@ Project conducted October through December 2020 as part of CSE 583 at the Univer
 
 ###  Limitations
 The data in this project is not continuously updating, and the repository will not necessarily be maintained beyond December 2020.
-
-### Acknowledgements
