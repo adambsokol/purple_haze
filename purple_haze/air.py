@@ -540,8 +540,6 @@ class DataStream:
         for old_name, new_name in rename.items():
             if old_name in dset:
                 dset = dset.rename({old_name: new_name})
-#             else:
-#                 pass
 
         # Assign units
 
@@ -564,8 +562,6 @@ class DataStream:
                 dset[field].attrs["units"] = "hpa"
             elif field == "rh":
                 dset[field].attrs["units"] = "%"
-#             else:
-#                 pass
 
         tstrings = [remove_utc(ts) for ts in dset["time"].values]
 
@@ -578,7 +574,6 @@ class DataStream:
         dset.attrs["data_type"] = self.data_type
 
         return dset
-
 
 class Sensor:
     """Represents a single Purple Air air quality monitor.
@@ -705,22 +700,6 @@ class Sensor:
             else:
                 # Should not end up here if previous input checks all passed.
                 pass
-
-#     def start_time(self):
-#         """ Finds beginning of Sensor's data record.
-
-#         Similar to DataStream.start_time() but for the Sensor class. If
-#         the Sensor's DataStreams have different start times, the
-#         earliest is returned.
-
-#         Returns:
-#             numpy datetime64: beginning of data reord.
-#         """
-
-#         # Start times for each of the four DataStreams
-#         start_times = pd.Series([s.start_time() for s in self.datastreams])
-
-#         return start_times.min()
 
     def load(self):
         """Loads and combines data from the sensor's DataStreams.
