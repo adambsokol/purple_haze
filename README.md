@@ -30,7 +30,7 @@ To install and run this locally do the following: <br>
 4. if using jupyter lab see 4a/b, otherwise skip to 5 <br>
 4a. install a few Jupyterlab extensions. You can either run the shell script: bash lab_extensions.sh (Note, that if running on Windows you may need to do the following command:<br>
 tr -d '\r' < lab_extensions.sh > new_lab_extensions.sh<br>
-Then run the new_lab_extensions.sh file) <br>
+Then run the new_lab_extensions.sh file. <br>
 4b. or you can do it manually be running the following in the command line: <br>
         jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build <br>
         jupyter labextension install @jupyter-voila/jupyterlab-preview --no-build <br>
