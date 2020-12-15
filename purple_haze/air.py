@@ -153,12 +153,12 @@ def get_tract_mean_aqi(df_row, include_smoke=True):
                               np.timedelta64(1, "h"))
             dsets = [ds.interp(time=times) for ds in dsets]
 
-#             # remove smoke period if desired
-#             if not include_smoke:
-#                 start = np.datetime64("2020-09-08T00:00:00")
-#                 end = np.datetime64("2020-09-19T23:00:00")
-#                 dsets = [ds.where((ds.time < start) | (ds.time > end))
-#                          for ds in dsets]
+            # remove smoke period if desired
+            if not include_smoke:
+                start = np.datetime64("2020-09-08T00:00:00")
+                end = np.datetime64("2020-09-19T23:00:00")
+                dsets = [ds.where((ds.time < start) | (ds.time > end))
+                         for ds in dsets]
 
             # find hourly mean AQI by averaging together sensors
             hourly_aqi = np.nanmean(np.stack([ds.aqi.values for ds in dsets]),
@@ -540,6 +540,8 @@ class DataStream:
         for old_name, new_name in rename.items():
             if old_name in dset:
                 dset = dset.rename({old_name: new_name})
+#             else:
+#                 pass
 
         # Assign units
 
@@ -562,6 +564,8 @@ class DataStream:
                 dset[field].attrs["units"] = "hpa"
             elif field == "rh":
                 dset[field].attrs["units"] = "%"
+#             else:
+#                 pass
 
         tstrings = [remove_utc(ts) for ts in dset["time"].values]
 
@@ -574,6 +578,7 @@ class DataStream:
         dset.attrs["data_type"] = self.data_type
 
         return dset
+
 
 class Sensor:
     """Represents a single Purple Air air quality monitor.
@@ -697,9 +702,25 @@ class Sensor:
                 self.str_b1 = stream
             elif stream.channel == "B" and stream.data_type == 2:
                 self.str_b2 = stream
-            else:
-                # Should not end up here if previous input checks all passed.
-                pass
+#             else:
+#                 # Should not end up here if previous input checks all passed.
+#                 pass
+
+#     def start_time(self):
+#         """ Finds beginning of Sensor's data record.
+
+#         Similar to DataStream.start_time() but for the Sensor class. If
+#         the Sensor's DataStreams have different start times, the
+#         earliest is returned.
+
+#         Returns:
+#             numpy datetime64: beginning of data reord.
+#         """
+
+#         # Start times for each of the four DataStreams
+#         start_times = pd.Series([s.start_time() for s in self.datastreams])
+
+#         return start_times.min()
 
     def load(self):
         """Loads and combines data from the sensor's DataStreams.
