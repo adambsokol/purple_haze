@@ -82,14 +82,14 @@ purple_haze/
 ```
 
 ### Project Data
-PurpleAir data <br>
+##### PurpleAir data <br>
 -Includes only sensors in or near Seattle <br>
 -Time series of PM2.5 concentrations from May 1st to Nov. 1st 2020 <br>
 -60 minute averaged data <br>
 -Source: https://www.purpleair.com/map
 
     
-Socioeconomic data <br>
+##### Socioeconomic data <br>
 -Census level data within Seattle <br>
 -Includes demographic, socioeconomic, and health metric data <br>
 -Source: https://data.seattle.gov/dataset/Racial-and-Social-Equity-Composite-Index/da35-mm5v
