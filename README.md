@@ -88,12 +88,19 @@ purple_haze/
 -60 minute averaged data <br>
 -Source: https://www.purpleair.com/map
 
-    
 ##### Socioeconomic data <br>
 -Census level data within Seattle <br>
 -Includes demographic, socioeconomic, and health metric data <br>
 -Source: https://data.seattle.gov/dataset/Racial-and-Social-Equity-Composite-Index/da35-mm5v
 
+### Air Quality Metric Calculation
+Each hourly PM2.5 measurement from the Purple Air dataset is used to compute the hourly Air Quality Index (AQI). AQI is calculated using the EPA formula (see https://www.airnow.gov/sites/default/files/2018-05/aqi-technical-assistance-document-may2016.pdf). <br>
+
+Hourly AQI measurements from outdoor Purple Air sensors are then used to calculate several air quality metrics for each sensor-containing census tract:
+* mean_aqi: the average AQI for the census tract. If there are multiple sensors in a tract, the sensor-mean AQI is first calculated at each hour of the data record, and then the time-mean AQI is calculated for the whole tract.
+* mean_aqi_no_smoke: as above, but not including measurements between 00:00 UTC on 2020-09-08 and 23:00 UTC on 2020-09-19, when thick wildfire smoke covered Seattle. Because the smoke produced very high AQI across the region, it may mask any underlying correlations between AQI and different socioeconomic metrics.
+* exposure_aqi100 (exposure_aqi150): the average amount of time that AQI in a census tract exceeds 100 (150), expressed in minutes per week. This is calculated finding the total number of hourly AQI measurements in the tract that exceed the AQI threshold (across all otutdoor sensors) and dividing by the total number of valid, outdoor, hourly AQI measurements in the tract. Units are then converted to minutes per week.
+* exposure_aqi100_no_smoke (exposure_aqi150_no_smoke): as above, but not including measurements between 00:00 UTC on 2020-09-08 and 23:00 UTC on 2020-09-19.
 
 ### Project History
 Project conducted October through December 2020 as part of CSE 583 at the University of Washington.
