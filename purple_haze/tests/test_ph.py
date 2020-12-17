@@ -101,7 +101,7 @@ class AirTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             air.files_to_dataframe(
-                'data/purple_air/10058 *(outside) (nolat nolon) Prim*.csv'
+                'data/purple_air/10058 *(outside) Prim*.csv'
             )
 
     def test_oneshot_files_to_dataframe_0(self):
@@ -132,6 +132,29 @@ class AirTests(unittest.TestCase):
         One-Shot test for air module
         Function: files_to_dataframe
 
+        Checking to see if __init__ can tell name even
+        if location is unknown
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+
+        sensor_data = air.files_to_dataframe(
+            [
+                'data/purple_air/Loc (47.0 -122.0) Primary 11_01_2020.csv'
+            ]
+        )
+        print(sensor_data['sensor_name'])
+        assert sensor_data['sensor_name'][0] == ('Loc').lower()
+
+    def test_oneshot_files_to_dataframe_2(self):
+        '''
+        One-Shot test for air module
+        Function: files_to_dataframe
+
         Checking to see if __init__ fills in 'undefined'
         for sensor location if it is not a known location
 
@@ -148,6 +171,26 @@ class AirTests(unittest.TestCase):
             ]
         )
         assert sensor_data['loc'][0] == 'undefined'
+
+    def test_edge_files_to_dataframe(self):
+        '''
+        Edge test for air module
+        Function: files_to_dataframe
+
+        raise error 'input must be string'
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+
+        Location = 5
+        with self.assertRaises(TypeError):
+            air.files_to_dataframe(
+                [Location]
+            )
 
     def test_smoke_tract_files_to_sensors(self):
         '''
@@ -240,10 +283,13 @@ class AirTests(unittest.TestCase):
             matched_ses_data_missing_names.apply(
                 lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
 
-    def test_smoke_get_tract_exposure(self):
+    def test_smoke_get_tract_exposure_0(self):
         '''
         Smoke test for air module
         Function: get_tract_exposure
+
+        Smoke test to check that get_tract_exposure
+        returns a returns some values (not nothing)
 
         Returns:
             bool:
@@ -257,6 +303,31 @@ class AirTests(unittest.TestCase):
 
         matched_ses_data['exp100'] = matched_ses_data.apply(
             lambda row: air.get_tract_exposure(row, 100), axis=1)
+        assert len(matched_ses_data['exp100']) > 0
+
+    def test_smoke_get_tract_exposure_1(self):
+        '''
+        Smoke test for air module
+        Function: get_tract_exposure
+
+        check to make sure it changes start/end times
+        when include_smoke = False
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+
+        sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
+        matched_ses_data = matcher.station_matcher(
+            sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
+
+        matched_ses_data['exp100'] = matched_ses_data.apply(
+            lambda row: air.get_tract_exposure(
+                row, 100, include_smoke=False), axis=1
+        )
         assert len(matched_ses_data['exp100']) > 0
 
     def test_edge_get_tract_exposure_0(self):
@@ -282,7 +353,7 @@ class AirTests(unittest.TestCase):
                 lambda row: air.get_tract_exposure(
                     row, aqi_threshold='100'), axis=1)
 
-    def test_edge_get_tract_exposure_1(self):
+    def test_edge_get_tract_exposure_2(self):
         '''
         Edge test for air module
         Function: get_tract_exposure
