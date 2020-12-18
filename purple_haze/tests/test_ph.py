@@ -202,14 +202,10 @@ class AirTests(unittest.TestCase):
 
         Test passes if True
         '''
-        sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
-        matched_ses_data = matcher.station_matcher(
-            sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
-
-        sensors = matched_ses_data.apply(
-            lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
-
-        assert len(sensors) > 0
+        sensor_data = air.tract_files_to_sensors(
+            glob.glob('data/purple_air/10058*')
+        )
+        assert len(sensor_data) > 0
 
     def test_edge_tract_files_to_sensors_0(self):
         '''
@@ -227,14 +223,10 @@ class AirTests(unittest.TestCase):
 
         Test passes if True
         '''
-        sensor_data = air.files_to_dataframe(glob.glob(
-            'data/purple_air/15th and Northgate B*'))
-        matched_ses_data = matcher.station_matcher(
-            sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
-
         with self.assertRaises(ValueError):
-            matched_ses_data.apply(
-                lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
+            air.tract_files_to_sensors(
+                glob.glob('data/purple_air/15th and Northgate B*')
+            )
 
     def test_edge_tract_files_to_sensors_1(self):
         '''
@@ -251,16 +243,16 @@ class AirTests(unittest.TestCase):
 
         Test passes if True
         '''
-        sensor_data = air.files_to_dataframe(glob.glob(
-            'data/purple_air/15th and Northgate B*'))
-        sensor_data.append(air.files_to_dataframe(glob.glob(
-            'data/purple_air/15th and Northgate B*')))
-        matched_ses_data = matcher.station_matcher(
-            sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
 
         with self.assertRaises(ValueError):
-            matched_ses_data.apply(
-                lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
+            air.tract_files_to_sensors(
+                ['data/purple_air/15th and Northgate (inside)\
+                (47.708524 -122.312421) Primary 60_minute_average\
+                05_01_2020 11_01_2020.csv',
+                 'data/purple_air/15th and Northgate (inside)\
+                 (47.708524 -122.312421) Primary 60_minute_average\
+                 05_01_2020 11_01_2020.csv']
+            )
 
     def test_edge_tract_files_to_sensors_2(self):
         '''
@@ -279,15 +271,140 @@ class AirTests(unittest.TestCase):
 
         Test passes if True
         '''
-        sensor_data = air.files_to_dataframe(glob.glob(
-            'data/purple_air/15th and Northgate B*'))
-        sensor_data['lat'][1] = 50
-        matched_ses_data = matcher.station_matcher(
-            sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
-
         with self.assertRaises(ValueError):
-            matched_ses_data.apply(
-                lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
+            air.tract_files_to_sensors(
+                ['data/purple_air/15th and Northgate (inside)\
+                (47.708524 -122.312421) Primary 60_minute_average\
+                05_01_2020 11_01_2020.csv',
+                 'data/purple_air/15th and Northgate (inside)\
+                 (00 -122.312421) Secondary 60_minute_average\
+                 05_01_2020 11_01_2020.csv']
+            )
+
+#     def test_smoke_tract_files_to_sensors(self):
+#         '''
+#         Smoke test for air module
+#         Function: tract_files_to_sensors
+
+#         Returns:
+#             bool:
+#                 True if successful, False otherwise.
+
+#         Test passes if True
+#         '''
+#         sensor_data = air.files_to_dataframe(glob.glob('data/purple_air/*'))
+#         matched_ses_data = matcher.station_matcher(
+#             sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
+
+#         sensors = matched_ses_data.apply(
+#             lambda df_row: air.get_tract_mean_aqi(df_row), axis=1)
+
+#         assert len(sensors) > 0
+
+#     def test_edge_tract_files_to_sensors_0(self):
+#         '''
+#         Edge test for air module
+#         Function: tract_files_to_sensors
+
+#         Checks to see if it catches that
+#         we've got fewer than 4 csvs
+#         Should raise:
+#         "Input list must contain four DataStreams"
+
+#         Returns:
+#             bool:
+#                 True if successful, False otherwise.
+
+#         Test passes if True
+#         '''
+#         sensor_data = air.files_to_dataframe(glob.glob(
+#             'data/purple_air/15th and Northgate B*'))
+#         matched_ses_data = matcher.station_matcher(
+#             sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
+
+#         with self.assertRaises(ValueError):
+#             matched_ses_data.apply(
+#                 lambda df_row: air.tract_files_to_sensors(df_row), axis=1)
+
+#     def test_edge_tract_files_to_sensors_1(self):
+#         '''
+#         Edge test for air module
+#         Function: tract_files_to_sensors
+
+#         Checks to see if it catches that
+#         we've got duplicate inputs. Should raise
+#         "DataStreams must have all unique combinations"
+
+#         Returns:
+#             bool:
+#                 True if successful, False otherwise.
+
+#         Test passes if True
+#         '''
+#         sensor_data = air.files_to_dataframe(glob.glob(
+#             'data/purple_air/15th and Northgate B*'))
+#         sensor_data.append(air.files_to_dataframe(glob.glob(
+#             'data/purple_air/15th and Northgate B*')))
+#         matched_ses_data = matcher.station_matcher(
+#             sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
+
+#         with self.assertRaises(ValueError):
+#             matched_ses_data.apply(
+#                 lambda df_row: air.tract_files_to_sensors(df_row), axis=1)
+
+#     def test_edge_tract_files_to_sensors_2(self):
+#         '''
+#         Edge test for air module
+#         Function: tract_files_to_sensors
+
+#         Checks to see if it catches that
+#         sensor streams must have same lat/lons.
+#         Should raise:
+#         "DataStreams must have matching \
+#         and lat/lon coordinates."
+
+#         Returns:
+#             bool:
+#                 True if successful, False otherwise.
+
+#         Test passes if True
+#         '''
+#         sensor_data = air.files_to_dataframe(glob.glob(
+#             'data/purple_air/15th and Northgate B*'))
+#         sensor_data['lat'][1] = 50
+#         matched_ses_data = matcher.station_matcher(
+#             sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
+
+#         with self.assertRaises(ValueError):
+#             matched_ses_data.apply(
+#                 lambda df_row: air.tract_files_to_sensors(df_row), axis=1)
+
+#     def test_edge_tract_files_to_sensors_3(self):
+#         '''
+#         Edge test for air module
+#         Function: tract_files_to_sensors
+
+#         Checks to see if it catches that
+#         sensor streams must have same lat/lons.
+#         Should raise:
+#         "DataStreams must have matching \
+#         and lat/lon coordinates."
+
+#         Returns:
+#             bool:
+#                 True if successful, False otherwise.
+
+#         Test passes if True
+#         '''
+#         sensor_data = air.files_to_dataframe(glob.glob(
+#             'data/purple_air/15th and Northgate B*'))
+# #         sensor_data['lat'][1] = 50
+#         matched_ses_data = matcher.station_matcher(
+#             sensor_data, ses_directory='data/seattle_ses_data/ses_data.shp')
+
+#         with self.assertRaises(ValueError):
+#             matched_ses_data.apply(
+#                 lambda df_row: air.tract_files_to_sensors(df_row), axis=1)
 
     def test_smoke_get_tract_mean_aqi(self):
         '''
