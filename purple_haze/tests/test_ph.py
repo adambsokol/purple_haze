@@ -281,6 +281,71 @@ class AirTests(unittest.TestCase):
                  05_01_2020 11_01_2020.csv']
             )
 
+    def test_edge_tract_files_to_sensors_3(self):
+        '''
+        Edge test for air module
+        Function: tract_files_to_sensors
+
+        Checks to see if it catches that
+        sensor streams must have same lat/lons.
+        Should raise:
+        "DataStreams must have valid channel IDs."
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+        with self.assertRaises(ValueError):
+            air.tract_files_to_sensors(
+                ['data/purple_air/15th and Northgate (inside)\
+                (47.708524 -122.312421) Primary 60_minute_average\
+                05_01_2020 11_01_2020.csv',
+                 'data/purple_air/15th and Northgate (inside)\
+                 (47.708524 -122.312421) Secondary 60_minute_average\
+                 05_01_2020 11_01_2020.csv',
+                 'data/purple_air/15th and Northgate (inside)\
+                 (47.708524 -122.312421) Primary 60_minute_average\
+                 05_01_2020 11_01_2020.csv',
+                 'data/purple_air/15th and Northgate (inside)\
+                 (47.708524 -122.312421) Secondary 60_minute_average\
+                 05_01_2020 11_01_2020.csv']
+            )
+
+    def test_edge_tract_files_to_sensors_4(self):
+        '''
+        Edge test for air module
+        Function: tract_files_to_sensors
+
+        Checks to see if it catches that
+        sensor streams must have same lat/lons.
+        Should raise:
+        "DataStreams must have valid channel IDs."
+
+        Returns:
+            bool:
+                True if successful, False otherwise.
+
+        Test passes if True
+        '''
+
+        with self.assertRaises(ValueError):
+            air.tract_files_to_sensors(
+                ['data/purple_air/15th and Northgate C (undefined)\
+                (47.708524 -122.312421) Tertiary 60_minute_average\
+                05_01_2020 11_01_2020.csv',
+                 'data/purple_air/15th and Northgate C (undefined)\
+                 (47.708524 -122.312421) Tertiary 60_minute_average\
+                 05_01_2020 11_01_2020.csv',
+                 'data/purple_air/15th and Northgate (inside)\
+                 (47.708524 -122.312421) Primary 60_minute_average\
+                 05_01_2020 11_01_2020.csv',
+                 'data/purple_air/15th and Northgate (inside)\
+                 (47.708524 -122.312421) Secondary 60_minute_average\
+                 05_01_2020 11_01_2020.csv']
+            )
+
 #     def test_smoke_tract_files_to_sensors(self):
 #         '''
 #         Smoke test for air module
